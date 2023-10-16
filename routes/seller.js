@@ -1,21 +1,49 @@
 const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
-const mysql = require("mysql");
-
-const connection = mysql.createConnection({
-  host: "localhost",
-  user: "your_db_user",
-  password: "your_db_password",
-  database: "your_database",
-});
+const mysql = require("../db");
+const Seller = require("../models/seller");
+const { isEmail, isLength } = require("validator");
 
 router.get("/", (req, res) => {
   res.render("seller/main");
 });
 
-router.post("/signup", (req, res) => {
+router.get("/signup", (req, res) => {
   res.render("seller/signup");
+});
+router.post("/signup", (req, res) => {
+  try {
+    const name = req.body.name;
+    const userName = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+    if (!isEmail(email) || !isLength(password, { min: 8 })) {
+      res.status(400).send("Invalid Email or Password");
+      return;
+    }
+
+    const newSeller = new Seller(name, userName, email, password);
+    const sql =
+      "INSERT INTO seller(name,email,username,password) VALUES (?,?,?,?)";
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    mysql.query(
+      sql,
+      [newSeller.name, newSeller.email, newSeller.username, hashedPassword],
+      (err, results) => {
+        if (err) {
+          console.error(err);
+          res
+            .status(500)
+            .send("Error creating seller.Check username uniqueness");
+        } else {
+          // seller registration successful
+          res.redirect("/seller/login");
+        }
+      }
+    );
+  } catch (error) {}
+  //res.render("seller/signup");
 });
 
 router.get("/login", (req, res) => {
@@ -23,7 +51,25 @@ router.get("/login", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  res.render("seller/login");
+  const userName = req.body.username;
+  const password = req.body.password;
+  const sql = "SELECT * FROM seller WHERE username = ?";
+  mysql.query(sql, [userName], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error Authenticating seller");
+    } else if (result.length > 0) {
+      const seller = result[0];
+      if (bcrypt.compareSync(password, seller.password)) {
+        req.session.seller = seller;
+        res.redirect("/seller/dashboard");
+      } else {
+        res.status(401).send("Password donot match");
+      }
+    } else {
+      res.status(401).send("User not found");
+    }
+  });
 });
 
 router.get("/dashboard", (req, res) => {
