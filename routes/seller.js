@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const mysql = require("../db");
 const Seller = require("../models/seller");
+const Item = require("../models/item");
 const { isEmail, isLength } = require("validator");
 
 router.get("/", (req, res) => {
@@ -79,17 +80,78 @@ router.get("/dashboard", (req, res) => {
 
 router.get("/items", (req, res) => {
   //view items
-  res.render("seller/items");
+  res.render("seller/item/view");
 });
 
-router.post("/items", (req, res) => {
+router.get("/items/add", (req, res) => {
+  res.render("seller/item/addItem");
+});
+
+router.post("/items/add", (req, res) => {
   //add items
-  res.render("seller/items");
+  const itemName = req.body.itemName;
+  const price = req.body.price;
+  const category = req.body.category;
+  const sellerId = req.body.sellerId;
+  const sql = "SELECT * FROM seller WHERE sellerID = ? ";
+  mysql.query(sql, [sellerId], (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Error Querying database");
+    } else if (result.length > 0) {
+      const newItem = new Item(itemName, price, category, sellerId);
+      const sql =
+        "INSERT INTO item(itemName,price,category,sellerId) VALUES (?,?,?,?)";
+      mysql.query(
+        sql,
+        [newItem.itemName, newItem.price, newItem.category, newItem.sellerId],
+        (err, result) => {
+          if (err) {
+            res.status(500).send("Error Querying Database");
+          } else {
+            res.redirect("/seller/items");
+          }
+        }
+      );
+    } else {
+      res.status(401).send(`Seller with ${sellerId} doesnt exist.Check again.`);
+    }
+  });
 });
 
-router.put("/items/:id", (req, res) => {
+router.get("/items/update/:id", (req, res) => {
+  const itemID = req.params.id;
+  const sql = "SELECT * FROM item WHERE itemId = ?";
+  mysql.query(sql, [itemID], (err, result) => {
+    if (err) {
+      res.status(500).send("Error Querying Database for updating");
+    } else if (result.length > 0) {
+      const item = result[0];
+      res.render("seller/item/updateItem", { item });
+    } else {
+      res.status(401).send(`Item with ${itemID} doesnt exist.Check again`);
+    }
+  });
+});
+
+router.post("/items/update/:id", (req, res) => {
   //update items
-  res.render("seller/items");
+  const itemID = req.params.id;
+  const itemName = req.body.itemName;
+  const price = req.body.price;
+  const category = req.body.category;
+
+  // Update the item in the database
+  const sql =
+    "UPDATE item SET itemName = ?, price = ?, category = ? WHERE itemId = ?";
+  mysql.query(sql, [itemName, price, category, itemID], (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Error querying database while updating");
+    } else {
+      res.redirect("/seller/items");
+    }
+  });
 });
 
 router.delete("/items/:id", (req, res) => {

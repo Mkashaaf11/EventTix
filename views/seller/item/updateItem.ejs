@@ -1,0 +1,22 @@
+<h1>update item</h1>
+
+<!-- updateItem.ejs -->
+<form action="/seller/items/update/<%= item.itemId %>" method="POST">
+  <label for="itemName">Item Name:</label>
+  <input
+    type="text"
+    id="itemName"
+    name="itemName"
+    value="<%= item.itemName %>"
+  />
+  <label for="price">Price:</label>
+  <input type="text" id="price" name="price" value="<%= item.price %>" />
+  <label for="category">Category:</label>
+  <select id="category" name="category">
+    <option value="beverage" <%= item.category === 'beverage' ? 'selected' : '' %> >Beverage</option>
+    <option value="Appetizer" <%= item.category === 'Appetizer' ? 'selected' : '' %> >Appetizer and Snack</option>
+    <option value="maincourse" <%= item.category === 'maincourse' ? 'selected' : '' %> >Main Course</option>
+  </select>
+  <!-- Add other fields as needed -->
+  <button type="submit">Update</button>
+</form>
