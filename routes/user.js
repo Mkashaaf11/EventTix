@@ -6,7 +6,20 @@ const User = require("../models/user");
 const { isEmail, isLength } = require("validator");
 
 router.get("/", (req, res) => {
-  res.render("user/main");
+  const sql = "SELECT sellerId,name FROM seller order by sellerId asc";
+  mysql.query(sql, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error getting sellers");
+    } 
+    else if (result.length > 0) {
+      const shops = result;
+      res.render("user/main",{ shops: shops });
+    }
+    else{
+      req.send("No shop available");
+    }
+  });
 });
 
 router.get("/signup", (req, res) => {
@@ -85,10 +98,7 @@ router.post("/login", (req, res) => {
   });
 });
 
-router.get("/dashboard", (req, res) => {
-  //place order,view order
-  res.render("user/dashboard");
-});
+
 
 router.get("/profile", ensureAuthenticated, (req, res) => {
   res.render("user/profile", { user });
@@ -104,11 +114,31 @@ router.get("/logout", (req, res) => {
   });
 });
 
+router.get("/shop/:id",(req,res)=>{
+  const sql = "SELECT itemName,price FROM item WHERE sellerId = ?";
+  const id=req.params.id;
+  mysql.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error authenticating user");
+    } else if (results.length > 0) {
+    
+      const items = results;
+
+        res.render("user/showitems",{items:items});
+      
+    } else {
+      res.send("No item found");
+    }
+  });
+
+
+});
 function isUsernameUnique(username) {
   // Implement username uniqueness check against the database
   // Return true if the username is unique, otherwise false
   // You can perform a SELECT query to check for existing usernames
-  return true; // Replace with actual database check
+  return true; // Replace with actalu database check
 }
 
 function ensureAuthenticated(req, res, next) {
