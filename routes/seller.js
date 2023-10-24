@@ -80,7 +80,17 @@ router.get("/dashboard", (req, res) => {
 
 router.get("/items", (req, res) => {
   //view items
-  res.render("seller/item/view");
+  const sql = "SELECT * FROM item";
+  mysql.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Error Connecting Database");
+    } else if (result.length > 0) {
+      res.render("seller/item/view", { items: result });
+    } else {
+      res.status(400).send("No item Exist");
+    }
+  });
 });
 
 router.get("/items/add", (req, res) => {
@@ -134,7 +144,7 @@ router.get("/items/update/:id", (req, res) => {
   });
 });
 
-router.post("/items/update/:id", (req, res) => {
+router.put("/items/update/:id", (req, res) => {
   //update items
   const itemID = req.params.id;
   const itemName = req.body.itemName;
@@ -154,9 +164,17 @@ router.post("/items/update/:id", (req, res) => {
   });
 });
 
-router.delete("/items/:id", (req, res) => {
+router.delete("/items/delete/:id", (req, res) => {
   //delete items
-  res.render("seller/items");
+  const itemId = req.params.id;
+  const sql = "DELETE FROM item WHERE itemId = ? ";
+  mysql.query(sql, [itemId], (err, result) => {
+    if (err) {
+      res.status(500).send("Error Querying Database while deleting");
+    } else {
+      res.redirect("/seller/items");
+    }
+  });
 });
 
 router.get("/profile", (req, res) => {

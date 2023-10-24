@@ -3,13 +3,16 @@ const app = express();
 const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
 const path = require("path");
+const methodOverride = require("method-override");
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.set("layout", "layouts/layout");
 app.use(expressLayouts);
 app.use(express.static("public"));
+app.use(methodOverride("_method"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
 app.use(
   session({
     secret: "your-secret-key", // Replace with a secret key for session encryption
