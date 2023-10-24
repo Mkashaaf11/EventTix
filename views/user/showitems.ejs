@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <ol>
+            <% items.forEach(item => { %>
+                <li class="list-item">
+                   <span><%=item.itemName%></span>
+                   <span><%=item.price%></span>
+                    <button class="add-button">Add</button>
+                  </li>
+              <% }) %>
+
+
+        </ol>
+
+    </div>
+</body>
+</html>
