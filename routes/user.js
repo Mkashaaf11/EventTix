@@ -3,7 +3,10 @@ const express = require("express");
 const router = express.Router();
 const mysql = require("../db");
 const User = require("../models/user");
+const Cart = require("../models/cart");
+const Order = require("../models/order");
 const { isEmail, isLength } = require("validator");
+const { closeDelimiter } = require("ejs");
 
 router.get("/", (req, res) => {
   const sql = "SELECT sellerId,name FROM seller order by sellerId asc";
@@ -17,11 +20,11 @@ router.get("/", (req, res) => {
       res.render("user/main",{ shops: shops });
     }
     else{
-      req.send("No shop available");
+      res.render("user/main",{ shops: null });
     }
   });
 });
-
+var userId=0;
 router.get("/signup", (req, res) => {
   res.render("user/signup");
 });
@@ -83,10 +86,12 @@ router.post("/login", (req, res) => {
     } else if (results.length > 0) {
       // User found, compare hashed passwords
       const user = results[0];
+      userId=user.userId;
+      console.log(userId);
       if (bcrypt.compareSync(password, user.password)) {
         // Passwords match, login successful
         // req.session.user = user; // Assuming you're using Express sessions
-        res.redirect("/user/dashboard"); // Redirect to the user's dashboard
+        res.redirect("/user"); // Redirect to the user's dashboard
       } else {
         // Passwords do not match
         res.status(401).send("Incorrect password");
@@ -115,12 +120,12 @@ router.get("/logout", (req, res) => {
 });
 
 router.get("/shop/:id",(req,res)=>{
-  const sql = "SELECT itemName,price FROM item WHERE sellerId = ?";
+  const sql = "SELECT itemId,itemName,price,sellerId FROM item WHERE sellerId = ?";
   const id=req.params.id;
   mysql.query(sql, [id], (err, results) => {
     if (err) {
       console.error(err);
-      res.status(500).send("Error authenticating user");
+      res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
     
       const items = results;
@@ -128,11 +133,118 @@ router.get("/shop/:id",(req,res)=>{
         res.render("user/showitems",{items:items});
       
     } else {
-      res.send("No item found");
+      res.render("user/showitems",{items:null});
     }
   });
 
 
+});
+
+
+router.post("/shop/add_to_cart", (req, res) => {
+  const itemId = req.body.itemId;
+  const sellerId=req.body.sellerId;
+  const quantity = 1;
+  const newCart = new Cart(itemId, 1, quantity);
+  const sql1="select * from cart where itemId=? and userId=?";
+  mysql.query(sql1, [newCart.itemId, newCart.uid], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({ success: false, message: "Error adding item to cart" });
+    } else if (results.length>0){
+      const sq="update cart set quantity=quantity+1 where itemId=? and userId=?"
+      mysql.query(sq, [newCart.itemId, newCart.uid], (err, results) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send({ success: false, message: "Error adding item to cart" });
+        } else {
+          res.redirect(`/user/shop/${sellerId}`);
+        }
+      });
+    }
+    else{
+    const sq = "INSERT INTO cart (itemId, userId, quantity) VALUES (?, ?, ?)";
+ 
+   mysql.query(sq, [newCart.itemId, newCart.uid, newCart.quantity], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({ success: false, message: "Error adding item to cart" });
+    } else {
+      res.redirect(`/user/shop/${sellerId}`);
+    }
+  });
+    }
+  });
+
+
+  
+});
+router.get("/cart",(req,res)=>{
+  const id=1;
+  const sql = `SELECT i.itemId,i.itemName,i.price,s.name,c.quantity 
+                FROM item i natural join cart c
+                natural join seller s
+                WHERE c.userId = ?`;
+ 
+  mysql.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error Querying database");
+    } else if (results.length > 0) {
+    
+      const cartItems = results;
+
+        res.render("user/cart",{cartItems:cartItems});
+      
+    } 
+    else{
+      res.render("user/cart",{cartItems:null});
+    }
+  });
+
+
+});
+router.delete("/cart/delete/:id", (req, res) => {
+  const itemId = req.params.id;
+  const userId=1;
+  console.log("hello");
+  const sql = "DELETE FROM cart WHERE itemId = ? and userId=? ";
+  mysql.query(sql, [itemId,userId], (err, result) => {
+    if (err) {
+      res.status(500).send("Error Querying Database while deleting");
+    } else {
+      res.redirect("/user/cart");
+    }
+  });
+});
+
+router.post("/order", (req, res) => {
+  const itemId = req.body.itemId;
+  const sellerId=req.body.sellerId;
+  const quantity = 1;
+  const newCart = new Cart(itemId, 1, quantity);
+  const sql1="select * from cart where  userId=?";
+  mysql.query(sql1, [newCart.uid], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({ success: false, message: "Error adding item to cart" });
+    } else if (results.length>0){
+      results.forEach(item=>{
+         const neworder=new Order(item.itemId,item.quantity,item.userId,'processing');
+         const sql="insert into orders (itemId,userId,status,quantity) values(?,?,?,?)"
+         mysql.query(sql, [neworder.itemId,neworder.uid,neworder.status,neworder.quantity], (err, results) => {
+          if (err) {
+            console.error(err);
+            res.status(500).send({ success: false, message: "Error adding item to cart" });
+          } 
+        });
+      });
+      res.redirect("/user/cart");
+    }
+  });
+
+
+  
 });
 function isUsernameUnique(username) {
   // Implement username uniqueness check against the database

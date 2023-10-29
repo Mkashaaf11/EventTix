@@ -7,10 +7,13 @@
 </head>
 <body>
     <div>
+        <% if(shops!=null){ %>
         <% shops.forEach(shop => { %>
             <div><a href="user/shop/<%=shop.sellerId%>"><%=shop.name%></a></div>
           <% }) %>
-        
+          <%} else{%>
+                 <div>No Shop is currently available</div>
+            <% }%>
     </div>
 </body>
 </html>
