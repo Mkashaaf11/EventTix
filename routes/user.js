@@ -17,16 +17,10 @@ router.get("/", ensureAuthenticated, (req, res) => {
       res.status(500).send("Error getting sellers");
     } else if (result.length > 0) {
       const shops = result;
-<<<<<<< HEAD
       res.render("user/main",{ shops: shops });
     }
     else{
       res.render("user/main",{ shops: null });
-=======
-      res.render("user/main", { shops: shops });
-    } else {
-      req.send("No shop available");
->>>>>>> 629a10969ed8f7fb8a601c6d426774b7b65342f9
     }
   });
 });
@@ -94,16 +88,13 @@ router.post("/login", (req, res) => {
       // User found, compare hashed passwords
       const user = results[0];
       userId=user.userId;
-      console.log(userId);
       if (bcrypt.compareSync(password, user.password)) {
         // Passwords match, login successful
-<<<<<<< HEAD
-        // req.session.user = user; // Assuming you're using Express sessions
-        res.redirect("/user"); // Redirect to the user's dashboard
-=======
+      // Redirect to the user's dashboard
+
         req.session.user = user; // using Express sessions
-        res.redirect("/user/dashboard"); // Redirect to the user's dashboard
->>>>>>> 629a10969ed8f7fb8a601c6d426774b7b65342f9
+        res.redirect("/user"); // Redirect to the user's dashboard
+
       } else {
         // Passwords do not match
         req.flash("error", "Incorrect Password");
@@ -137,15 +128,9 @@ router.get("/logout", (req, res) => {
   });
 });
 
-<<<<<<< HEAD
 router.get("/shop/:id",(req,res)=>{
   const sql = "SELECT itemId,itemName,price,sellerId FROM item WHERE sellerId = ?";
   const id=req.params.id;
-=======
-router.get("/shop/:id", (req, res) => {
-  const sql = "SELECT itemName,price FROM item WHERE sellerId = ?";
-  const id = req.params.id;
->>>>>>> 629a10969ed8f7fb8a601c6d426774b7b65342f9
   mysql.query(sql, [id], (err, results) => {
     if (err) {
       console.error(err);
@@ -161,11 +146,12 @@ router.get("/shop/:id", (req, res) => {
 });
 
 
-router.post("/shop/add_to_cart", (req, res) => {
+router.post("/shop/add_to_cart", ensureAuthenticated, (req, res) => {
   const itemId = req.body.itemId;
   const sellerId=req.body.sellerId;
   const quantity = 1;
-  const newCart = new Cart(itemId, 1, quantity);
+  const user=req.session.user;
+  const newCart = new Cart(itemId, user.userId, quantity);
   const sql1="select * from cart where itemId=? and userId=?";
   mysql.query(sql1, [newCart.itemId, newCart.uid], (err, results) => {
     if (err) {
@@ -199,8 +185,9 @@ router.post("/shop/add_to_cart", (req, res) => {
 
   
 });
-router.get("/cart",(req,res)=>{
-  const id=1;
+router.get("/cart", ensureAuthenticated,(req,res)=>{
+  const user=req.session.user;
+  const id=user.userId;
   const sql = `SELECT i.itemId,i.itemName,i.price,s.name,c.quantity 
                 FROM item i natural join cart c
                 natural join seller s
@@ -224,10 +211,10 @@ router.get("/cart",(req,res)=>{
 
 
 });
-router.delete("/cart/delete/:id", (req, res) => {
+router.delete("/cart/delete/:id", ensureAuthenticated, (req, res) => {
   const itemId = req.params.id;
-  const userId=1;
-  console.log("hello");
+  const user=req.session.user;
+  const userId=user.userId;
   const sql = "DELETE FROM cart WHERE itemId = ? and userId=? ";
   mysql.query(sql, [itemId,userId], (err, result) => {
     if (err) {
@@ -238,11 +225,11 @@ router.delete("/cart/delete/:id", (req, res) => {
   });
 });
 
-router.post("/order", (req, res) => {
-  const itemId = req.body.itemId;
-  const sellerId=req.body.sellerId;
+router.post("/order", ensureAuthenticated, (req, res) => {
+  
   const quantity = 1;
-  const newCart = new Cart(itemId, 1, quantity);
+  const user=req.session.user;
+  const newCart = new Cart(itemId, user.userId, quantity);
   const sql1="select * from cart where  userId=?";
   mysql.query(sql1, [newCart.uid], (err, results) => {
     if (err) {
