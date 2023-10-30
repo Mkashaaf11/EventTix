@@ -1,6 +1,10 @@
 <h1>Login Page</h1>
 
-<
+<!-- Inside your login.ejs or a similar view -->
+<% if (messages.error) { %>
+<div class="alert alert-danger"><%= messages.error %></div>
+<% } %>
+
 <h1>User Login</h1>
 <form action="/user//login" method="POST">
   <label for="username">Username:</label>
