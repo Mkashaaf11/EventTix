@@ -2,25 +2,31 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
 const mysql = require("../db");
+
 const User = require("../models/user");
 const Cart = require("../models/cart");
 const Order = require("../models/order");
 const { isEmail, isLength } = require("validator");
 const { closeDelimiter } = require("ejs");
 
-router.get("/", (req, res) => {
+router.get("/", ensureAuthenticated, (req, res) => {
   const sql = "SELECT sellerId,name FROM seller order by sellerId asc";
   mysql.query(sql, (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).send("Error getting sellers");
-    } 
-    else if (result.length > 0) {
+    } else if (result.length > 0) {
       const shops = result;
+<<<<<<< HEAD
       res.render("user/main",{ shops: shops });
     }
     else{
       res.render("user/main",{ shops: null });
+=======
+      res.render("user/main", { shops: shops });
+    } else {
+      req.send("No shop available");
+>>>>>>> 629a10969ed8f7fb8a601c6d426774b7b65342f9
     }
   });
 });
@@ -82,7 +88,8 @@ router.post("/login", (req, res) => {
   mysql.query(sql, [username], (err, results) => {
     if (err) {
       console.error(err);
-      res.status(500).send("Error authenticating user");
+      req.flash("error", "Error authenticating user.Server Error");
+      res.redirect("/user/login");
     } else if (results.length > 0) {
       // User found, compare hashed passwords
       const user = results[0];
@@ -90,54 +97,67 @@ router.post("/login", (req, res) => {
       console.log(userId);
       if (bcrypt.compareSync(password, user.password)) {
         // Passwords match, login successful
+<<<<<<< HEAD
         // req.session.user = user; // Assuming you're using Express sessions
         res.redirect("/user"); // Redirect to the user's dashboard
+=======
+        req.session.user = user; // using Express sessions
+        res.redirect("/user/dashboard"); // Redirect to the user's dashboard
+>>>>>>> 629a10969ed8f7fb8a601c6d426774b7b65342f9
       } else {
         // Passwords do not match
-        res.status(401).send("Incorrect password");
+        req.flash("error", "Incorrect Password");
+        res.redirect("/user/login");
       }
     } else {
       // User not found
-      res.status(401).send("User not found");
+      req.flash("error", "user not found");
+      res.redirect("/user/signup");
     }
   });
 });
 
-
-
 router.get("/profile", ensureAuthenticated, (req, res) => {
+  const user = req.session.user;
   res.render("user/profile", { user });
 });
 
+router.get("/dashboard", ensureAuthenticated, (req, res) => {
+  const user = req.session.user;
+  res.render("user/dashboard", { user });
+});
+
 router.get("/logout", (req, res) => {
-  res.render("user/logout");
+  //res.render("user/logout");
   req.session.destroy((err) => {
     if (err) {
       console.error(err);
     }
-    res.redirect("user/login"); // Redirect to the login page after signing out
+    res.redirect("/user/login"); // Redirect to the login page after signing out
   });
 });
 
+<<<<<<< HEAD
 router.get("/shop/:id",(req,res)=>{
   const sql = "SELECT itemId,itemName,price,sellerId FROM item WHERE sellerId = ?";
   const id=req.params.id;
+=======
+router.get("/shop/:id", (req, res) => {
+  const sql = "SELECT itemName,price FROM item WHERE sellerId = ?";
+  const id = req.params.id;
+>>>>>>> 629a10969ed8f7fb8a601c6d426774b7b65342f9
   mysql.query(sql, [id], (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
-    
       const items = results;
 
-        res.render("user/showitems",{items:items});
-      
+      res.render("user/showitems", { items: items });
     } else {
       res.render("user/showitems",{items:null});
     }
   });
-
-
 });
 
 
@@ -257,7 +277,7 @@ function ensureAuthenticated(req, res, next) {
   if (req.session.user) {
     return next(); // User is authenticated, proceed to the route
   }
-  res.redirect("/login"); // Redirect to the login page if not authenticated
+  res.redirect("/user/login"); // Redirect to the login page if not authenticated
 }
 
 module.exports = router;

@@ -1,4 +1,7 @@
 <h1>Seller login</h1>
+<% if (messages.error) { %>
+<div class="alert alert-danger"><%= messages.error %></div>
+<% } %>
 
 <form action="/seller/login" method="post">
   <label for="username">Username:</label>

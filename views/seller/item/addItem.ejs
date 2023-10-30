@@ -12,7 +12,13 @@
     <option value="maincourse">Main Course</option>
   </select>
   <label for="sellerid">Seller ID:</label>
-  <input type="text" id="sellerid" name="sellerId" />
+  <input
+    type="text"
+    id="sellerid"
+    name="sellerId"
+    value="<%=session.seller.sellerID  %>"
+    readonly
+  />
 
   <button type="submit">Add Item</button>
 </form>
