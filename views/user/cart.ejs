@@ -45,11 +45,6 @@
                 <td><%= total %></td>
                 <td>&nbsp;</td>
             </tr>
-            <div>
-                <form action="/user/order" method="post">
-                    <input type="submit" value="Order">
-                </form>
-            </div>
                
                 
             <%
@@ -66,7 +61,15 @@
             }
             %>
        
-    
+    </table>
+    <%if(cartItems!=null)
+    {%>
+    <div>
+        <form action="/user/order" method="post">
+            <input type="submit" value="Order">
+        </form>
+    </div>
+     <%}%>
     </div>
     
     <script>

@@ -9,7 +9,7 @@ const Order = require("../models/order");
 const { isEmail, isLength } = require("validator");
 const { closeDelimiter } = require("ejs");
 
-router.get("/", ensureAuthenticated, (req, res) => {
+router.get("/", (req, res) => {
   const sql = "SELECT sellerId,name FROM seller order by sellerId asc";
   mysql.query(sql, (err, result) => {
     if (err) {
@@ -189,8 +189,8 @@ router.get("/cart", ensureAuthenticated,(req,res)=>{
   const user=req.session.user;
   const id=user.userId;
   const sql = `SELECT i.itemId,i.itemName,i.price,s.name,c.quantity 
-                FROM item i natural join cart c
-                natural join seller s
+                FROM item i inner join cart c on i.itemId=c.itemId
+                inner join seller s on s.sellerId=i.sellerId
                 WHERE c.userId = ?`;
  
   mysql.query(sql, [id], (err, results) => {
@@ -226,7 +226,7 @@ router.delete("/cart/delete/:id", ensureAuthenticated, (req, res) => {
 });
 
 router.post("/order", ensureAuthenticated, (req, res) => {
-  
+  const itemId=0;
   const quantity = 1;
   const user=req.session.user;
   const newCart = new Cart(itemId, user.userId, quantity);
@@ -238,7 +238,7 @@ router.post("/order", ensureAuthenticated, (req, res) => {
     } else if (results.length>0){
       results.forEach(item=>{
          const neworder=new Order(item.itemId,item.quantity,item.userId,'processing');
-         const sql="insert into orders (itemId,userId,status,quantity) values(?,?,?,?)"
+         const sql="insert into orders (itemId,userId,order_status,quantity) values(?,?,?,?)"
          mysql.query(sql, [neworder.itemId,neworder.uid,neworder.status,neworder.quantity], (err, results) => {
           if (err) {
             console.error(err);
@@ -253,6 +253,32 @@ router.post("/order", ensureAuthenticated, (req, res) => {
 
   
 });
+router.get("/order_history", ensureAuthenticated, (req, res) => {
+  const user=req.session.user;
+  const id=user.userId;
+  const sql = `SELECT i.itemName,i.price,s.name,o.quantity,o.order_status
+               FROM item i inner join orders o on i.itemId=o.itemId
+               inner join seller s on s.sellerId=i.sellerId
+               WHERE o.userId = ?`;
+ 
+  mysql.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error Querying database");
+    } else if (results.length > 0) {
+    
+      const orderItems = results;
+
+        res.render("user/order-history",{orderItems:orderItems});
+      
+    } 
+    else{
+      res.render("user/order-history",{orderItems:null});
+    }
+
+});
+});
+
 function isUsernameUnique(username) {
   // Implement username uniqueness check against the database
   // Return true if the username is unique, otherwise false
