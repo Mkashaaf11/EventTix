@@ -1,0 +1,18 @@
+<h1>view item</h1>
+<ul>
+  <% for (let i = 0; i < events.length; i++) { %>
+  <li>
+    Event Name: <%= events[i].eventName %><br />
+    Price: <%= events[i].price %><br />
+    Category: <%= events[i].categoryId %>
+  </li>
+  <a href="/org/events/update/<%= events[i].eventId %>">Update</a>
+  <form
+    method="POST"
+    action="/org/events/delete/<%= events[i].eventId %>?_method=DELETE"
+  >
+    <button type="submit">Delete</button>
+  </form>
+
+  <% } %>
+</ul>

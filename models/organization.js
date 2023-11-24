@@ -1,4 +1,4 @@
-class Seller {
+class Organization {
   constructor(name, username, email, password) {
     this.name = name;
     this.username = username;
@@ -9,4 +9,4 @@ class Seller {
   // You can add methods to the class as needed
 }
 
-module.exports = Seller;
+module.exports = Organization;

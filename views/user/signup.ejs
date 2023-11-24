@@ -13,5 +13,15 @@
 
   <!-- Add more fields for other required information -->
 
+  <label for="age">Age:</label>
+  <input type="number" id="age" name="age" required min="12" />
+
+  <label for="city">City:</label>
+  <select id="city" name="city" required>
+    <% cities.forEach(city => { %>
+    <option value="<%= city.cityId %>"><%= city.cityName %></option>
+    <% }); %>
+  </select>
+
   <button type="submit">Sign Up</button>
 </form>

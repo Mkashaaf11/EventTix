@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
+  </head>
+  <body>
     <div>
-        <% if(shops!=null){ %>
-        <% shops.forEach(shop => { %>
-            <div><a href="user/shop/<%=shop.sellerId%>"><%=shop.name%></a></div>
-          <% }) %>
-          <%} else{%>
-                 <div>No Shop is currently available</div>
-            <% }%>
+      <% if(categories != null){ %> <% categories.forEach(category => { %>
+      <div>
+        <a href="user/category/<%= category.categoryID %>"
+          ><%= category.name %> <%= category.description %></a
+        >
+      </div>
+      <% }) %> <% } else { %>
+      <div>Cant Show categories rightnow</div>
+      <% } %>
     </div>
-</body>
+  </body>
 </html>

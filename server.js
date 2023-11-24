@@ -39,11 +39,11 @@ app.use(
 
 const indexRouter = require("./routes/index");
 const userRouter = require("./routes/user");
-const sellerRouter = require("./routes/seller");
+const organizationRouter = require("./routes/organization");
 const adminRouter = require("./routes/admin");
 app.use("/", indexRouter);
 app.use("/user", userRouter);
-app.use("/seller", sellerRouter);
+app.use("/org", organizationRouter);
 app.use("/admin", adminRouter);
 
 const PORT = process.env.PORT || 3000;

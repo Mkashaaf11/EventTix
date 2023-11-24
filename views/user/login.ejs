@@ -2,11 +2,11 @@
 
 <!-- Inside your login.ejs or a similar view -->
 <% if (messages.error) { %>
-<div class="alert alert-danger"><%= messages.error %></div>
+<div style="color: red; margin-bottom: 10px"><%= messages.error %></div>
 <% } %>
 
-<h1>User Login</h1>
-<form action="/user//login" method="POST">
+<h2>User Login</h2>
+<form action="/user/login" method="POST">
   <label for="username">Username:</label>
   <input type="text" id="username" name="username" required />
   <br />
@@ -15,5 +15,5 @@
   <input type="password" id="password" name="password" required />
   <br />
 
-  <button type="submit">Login</button>
+  <button type="submit" style="margin-top: 10px">Login</button>
 </form>

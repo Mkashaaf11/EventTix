@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <% if(events != null && events.length > 0) { %>
+      <ol>
+        <% events.forEach(event => { %>
+        <li class="list-item">
+          <span><%= event.eventName %></span><br />
+          <span>Price: <%= event.price %></span><br />
+          <span>Event Date: <%= event.eventDate %></span><br />
+          <span>Event Time: <%= event.eventTime %></span><br />
+          <span>Description: <%= event.Description %></span><br />
+        </li>
+        <% }) %>
+      </ol>
+      <% } else { %>
+      <div>No events available for this category</div>
+      <% } %>
+    </div>
+  </body>
+</html>
