@@ -171,6 +171,17 @@ router.post("/events/add", (req, res) => {
   const categoryId = req.body.category;
   const cityCode = req.body.cityId;
 
+  if (
+    RemainingTickets > TotalTickets ||
+    TotalTickets < 0 ||
+    RemainingTickets < 0
+  ) {
+    req.flash(
+      "error",
+      "Remaining Tickets Should always be less than or equal to Total Tickets"
+    );
+    res.redirect("/org/events/add");
+  }
   // Check if the organization with the specified orgId exists
   const orgSql = "SELECT * FROM organization WHERE orgID = ?";
   mysql.query(orgSql, [orgId], (err, orgResult) => {
@@ -301,6 +312,19 @@ router.put("/events/update/:id", (req, res) => {
   const categoryId = req.body.category;
   const cityCode = req.body.cityId;
 
+  if (
+    RemainingTickets > TotalTickets ||
+    isNaN(TotalTickets) ||
+    isNaN(RemainingTickets) ||
+    TotalTickets < 0 ||
+    RemainingTickets < 0
+  ) {
+    req.flash(
+      "error",
+      "Remaining tickets should always be less or equal to Total Tickets"
+    );
+    res.redirect("/org/events/update/:id");
+  }
   const newEvent = new Events(
     eventName,
     price,

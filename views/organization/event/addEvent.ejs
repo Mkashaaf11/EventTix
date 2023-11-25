@@ -6,7 +6,11 @@
 <div class="flash-message success"><%= messages.success %></div>
 <% } %>
 
-<form action="/org/events/add" method="POST">
+<form
+  action="/org/events/add"
+  method="POST"
+  onsubmit="return validateTickets()"
+>
   <label for="EventName">Event Name:</label>
   <input type="text" id="EventName" name="eventName" />
 
@@ -53,3 +57,27 @@
 
   <button type="submit">Add Item</button>
 </form>
+
+<script>
+  function validateTickets() {
+    const totalTickets = parseInt(
+      document.getElementById("TotalTickets").value
+    );
+    const remainingTickets = parseInt(
+      document.getElementById("RemainingTickets").value
+    );
+
+    if (
+      isNaN(totalTickets) ||
+      isNaN(remainingTickets) ||
+      remainingTickets > totalTickets ||
+      totalTickets < 0 ||
+      remainingTickets < 0
+    ) {
+      alert("Remaining Tickets should be less than or equal to Total Tickets.");
+      return false;
+    }
+
+    return true;
+  }
+</script>

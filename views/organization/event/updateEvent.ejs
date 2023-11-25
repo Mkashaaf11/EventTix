@@ -3,7 +3,7 @@
 <!-- updateItem.ejs -->
 <form
   action="/org/events/update/<%= event.eventId %>?_method=PUT"
-  method="POST"
+  method="POST" onsubmit="return validateTickets()"
 >
   <label for="eventName">Event Name:</label>
   <input
@@ -58,3 +58,26 @@
   <!-- Add other fields as needed -->
   <button type="submit">Update</button>
 </form>
+
+<script>
+  function validateTickets() {
+    const totalTickets = parseInt(
+      document.getElementById("TotalTickets").value
+    );
+    const remainingTickets = parseInt(
+      document.getElementById("RemainingTickets").value
+    );
+
+    if (
+      isNaN(totalTickets) ||
+      isNaN(remainingTickets) ||
+      remainingTickets > totalTickets || totalTickets < 0 ||
+      remainingTickets < 0
+    ) {
+      alert("Remaining Tickets should be less than or equal to Total Tickets.");
+      return false;
+    }
+
+    return true;
+  }
+</script>
