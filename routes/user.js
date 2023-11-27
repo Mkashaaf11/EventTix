@@ -4,7 +4,7 @@ const router = express.Router();
 const mysql = require("../db");
 
 const User = require("../models/user");
-const Cart = require("../models/cart");
+const Reservation = require("../models/reservation");
 const Order = require("../models/order");
 const { isEmail, isLength } = require("validator");
 const { closeDelimiter } = require("ejs");
@@ -25,7 +25,7 @@ router.get("/", ensureAuthenticated, (req, res) => {
     }
   });
 });
-var userId = 0;
+
 router.get("/signup", (req, res) => {
   const sql = "SELECT cityId,cityName FROM city";
   mysql.query(sql, (err, results) => {
@@ -129,7 +129,7 @@ router.post("/login", (req, res) => {
       res.redirect("/user/login");
     } else if (results.length > 0) {
       const user = results[0];
-      userId = user.userId;
+     
 
       if (bcrypt.compareSync(password, user.password)) {
         req.session.user = user;
@@ -183,124 +183,62 @@ router.get("/category/:id", (req, res) => {
   });
 });
 
-router.post("/shop/add_to_cart", ensureAuthenticated, (req, res) => {
-  const itemId = req.body.itemId;
-  const sellerId = req.body.sellerId;
-  const quantity = 1;
-  const user = req.session.user;
-  const newCart = new Cart(itemId, user.userId, quantity);
-  const sql1 = "select * from cart where itemId=? and userId=?";
-  mysql.query(sql1, [newCart.itemId, newCart.uid], (err, results) => {
-    if (err) {
-      console.error(err);
-      res
-        .status(500)
-        .send({ success: false, message: "Error adding item to cart" });
-    } else if (results.length > 0) {
-      const sq =
-        "update cart set quantity=quantity+1 where itemId=? and userId=?";
-      mysql.query(sq, [newCart.itemId, newCart.uid], (err, results) => {
-        if (err) {
-          console.error(err);
-          res
-            .status(500)
-            .send({ success: false, message: "Error adding item to cart" });
-        } else {
-          res.redirect(`/user/shop/${sellerId}`);
-        }
-      });
-    } else {
-      const sq = "INSERT INTO cart (itemId, userId, quantity) VALUES (?, ?, ?)";
 
-      mysql.query(
-        sq,
-        [newCart.itemId, newCart.uid, newCart.quantity],
-        (err, results) => {
-          if (err) {
-            console.error(err);
-            res
-              .status(500)
-              .send({ success: false, message: "Error adding item to cart" });
-          } else {
-            res.redirect(`/user/shop/${sellerId}`);
-          }
-        }
-      );
-    }
-  });
-});
-router.get("/cart", ensureAuthenticated, (req, res) => {
-  const user = req.session.user;
-  const id = user.userId;
-  const sql = `SELECT i.itemId,i.itemName,i.price,s.name,c.quantity 
-                FROM item i inner join cart c on i.itemId=c.itemId
-                inner join seller s on s.sellerId=i.sellerId
-                WHERE c.userId = ?`;
-
+router.get("/reserve/:id", ensureAuthenticated, (req, res) => {
+   const id=req.params.id;
+   const sql=`select eventId,eventName,price,eventDate,eventTime,description,cityName,name from   event e inner join city c
+              on c.cityId=e.cityCode inner join organization o on e.orgID=o.orgId
+              where eventId=?`;
+   
   mysql.query(sql, [id], (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
-      const cartItems = results;
-
-      res.render("user/cart", { cartItems: cartItems });
+      const info = results[0];
+      res.render("user/confirmBooking", { info: info });
     } else {
-      res.render("user/cart", { cartItems: null });
-    }
-  });
-});
-router.delete("/cart/delete/:id", ensureAuthenticated, (req, res) => {
-  const itemId = req.params.id;
-  const user = req.session.user;
-  const userId = user.userId;
-  const sql = "DELETE FROM cart WHERE itemId = ? and userId=? ";
-  mysql.query(sql, [itemId, userId], (err, result) => {
-    if (err) {
-      res.status(500).send("Error Querying Database while deleting");
-    } else {
-      res.redirect("/user/cart");
+      res.render("user/confirmBooking", { info: null });
     }
   });
 });
 
-router.post("/order", ensureAuthenticated, (req, res) => {
-  const itemId = 0;
-  const quantity = 1;
+router.post("/reserve", ensureAuthenticated, (req, res) => {
+  const eventId = req.body.eventId;
+  const quantity = req.body.quantity;
   const user = req.session.user;
-  const newCart = new Cart(itemId, user.userId, quantity);
-  const sql1 = "select * from cart where  userId=?";
-  mysql.query(sql1, [newCart.uid], (err, results) => {
+  const price=req.body.price;
+  const newReservation = new Reservation(eventId, user.id, quantity,price); 
+   const sql = "insert into reservation(userId,eventId,ticket_quantity,total_amount) values(?,?,?,?)";
+   mysql.query(sql, [newReservation.uid,newReservation.eventId,newReservation.quantity,newReservation.amount], (err, results) => {
     if (err) {
+      if(err.sqlState==='45000'){
+        req.flash("error", "Not enough tickets are available");
+        res.status(500).redirect(`/user/reserve/${eventId}`);
+      }
+      else{
       console.error(err);
-      res
-        .status(500)
-        .send({ success: false, message: "Error adding item to cart" });
-    } else if (results.length > 0) {
-      results.forEach((item) => {
-        const neworder = new Order(
-          item.itemId,
-          item.quantity,
-          item.userId,
-          "processing"
-        );
-        const sql =
-          "insert into orders (itemId,userId,order_status,quantity) values(?,?,?,?)";
-        mysql.query(
-          sql,
-          [neworder.itemId, neworder.uid, neworder.status, neworder.quantity],
-          (err, results) => {
-            if (err) {
-              console.error(err);
-              res
-                .status(500)
-                .send({ success: false, message: "Error adding item to cart" });
-            }
-          }
-        );
-      });
-      res.redirect("/user/cart");
+      res.status(500).send({ success: false, message: "Error booking event" });
+      }
     }
+    else{
+         const sql1="select categoryId from event where eventId=?";
+         mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
+          if (err1) {
+            console.error(err1);
+            res
+              .status(500)
+              .send({ success: false, message: "Error Refreshing" });
+          }
+          else if(results1.length>0){
+           const cat=results1[0].categoryId; 
+           req.flash("success", "Your reservation is successful");
+           res.redirect(`/user/category/${cat}`);
+        }
+         });
+     }
+    
+
   });
 });
 router.get("/order_history", ensureAuthenticated, (req, res) => {

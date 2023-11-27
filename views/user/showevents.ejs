@@ -16,6 +16,9 @@
           <span>Event Date: <%= event.eventDate %></span><br />
           <span>Event Time: <%= event.eventTime %></span><br />
           <span>Description: <%= event.Description %></span><br />
+          <form action="/user/reserve/<%=event.eventId%>" ">
+            <input type="submit" value="Book Now">
+          </form> 
         </li>
         <% }) %>
       </ol>

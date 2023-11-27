@@ -9,9 +9,10 @@
     <div>
       <% if(categories != null){ %> <% categories.forEach(category => { %>
       <div>
-        <a href="user/category/<%= category.categoryID %>"
-          ><%= category.name %> <%= category.description %></a
-        >
+        <a href="user/category/<%= category.categoryID %>">
+          <div><%= category.name %></div>
+         <div><%= category.description %></div> 
+        </a>
       </div>
       <% }) %> <% } else { %>
       <div>Cant Show categories rightnow</div>

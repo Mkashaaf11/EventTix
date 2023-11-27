@@ -114,7 +114,6 @@ router.get("/dashboard", ensureAuthenticated, (req, res) => {
 });
 
 router.get("/events", ensureAuthenticated, (req, res) => {
-  //view items
   const orgID = req.session.organization.orgID;
   const sql = "SELECT * FROM event WHERE orgId = ?";
   mysql.query(sql, [orgID], (err, result) => {
@@ -124,7 +123,7 @@ router.get("/events", ensureAuthenticated, (req, res) => {
     } else if (result.length > 0) {
       res.render("organization/event/view", { events: result });
     } else {
-      res.status(400).send("No item Exist");
+      res.status(400).send("No Event Exists");
     }
   });
 });

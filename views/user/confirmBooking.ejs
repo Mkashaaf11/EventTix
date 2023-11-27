@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+            <% 
+            if(info!=null)
+            {
+            %>
+          
+                <div>Event : <%= info.eventName%></div>
+                <div>Organized By : <%= info.name%></div>
+                <div>City : <%= info.cityName%></div>
+                <div>Date : <%= info.eventDate%></div>
+                <div>Start at : <%= info.eventTime%></div>
+                <div>Discription : <%= info.description%></div>
+                <div>Ticket Price : <span id="price"><%= info.price %></span></div>
+                <form action="/user/reserve" method="POST">
+                <div><span>Tickets Quantity : </span>
+                    <button type="button" id="increase">+</button><span >
+                    <input name="quantity" type="text" id="quantity" value="1" readonly></span>
+                    <button type="button" id="decrease">-</button>
+                </div>
+                <div><b>Total Amount:</b><span id="total"><%= info.price %></span></div>
+               <input name="eventId" type="hidden" value="<%= info.eventId%>">
+               <input name="price" type="hidden" value="<%= info.price%>">    
+               <input type="submit" value="Confirm Booking">
+               </form>
+        
+    
+     <%}%>
+    </div>
+    
+    <script>
+    const quantityElement = document.getElementById('quantity');
+    const increaseButton = document.getElementById('increase');
+    const decreaseButton = document.getElementById('decrease');
+    const total=document.getElementById('total');
+    const priceEle=document.getElementById('price');
+    increaseButton.addEventListener('click', () => {
+      const currentQuantity = parseInt(quantityElement.value);
+      quantityElement.value = currentQuantity + 1;
+      const price=parseInt(priceEle.textContent);
+      total.textContent=(currentQuantity + 1)*price;
+    });
+
+    decreaseButton.addEventListener('click', () => {
+      const currentQuantity = parseInt(quantityElement.value);
+      if (currentQuantity > 1) {
+        quantityElement.value = currentQuantity - 1;
+        const price=parseInt(priceEle.textContent);
+       total.textContent=(currentQuantity - 1)*price;
+      }
+    });
+
+    </script>
+</body>
+</html>
