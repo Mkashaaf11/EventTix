@@ -9,7 +9,7 @@ const Order = require("../models/order");
 const { isEmail, isLength } = require("validator");
 const { closeDelimiter } = require("ejs");
 
-router.get("/", ensureAuthenticated, (req, res) => {
+router.get("/", (req, res) => {
   const sql =
     "SELECT categoryID,name,description FROM category order by categoryID asc";
   mysql.query(sql, (err, result) => {
@@ -241,24 +241,27 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
 
   });
 });
-router.get("/order_history", ensureAuthenticated, (req, res) => {
+router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.user;
-  const id = user.userId;
-  const sql = `SELECT i.itemName,i.price,s.name,o.quantity,o.order_status
-               FROM item i inner join orders o on i.itemId=o.itemId
-               inner join seller s on s.sellerId=i.sellerId
-               WHERE o.userId = ?`;
+  const id = user.id;
+  const sql = `SELECT e.eventName,o.name as "org",c.name,ci.cityName,r.ticket_quantity,r.total_amount,r.reservationTime
+               FROM reservation r inner join event e  on r.eventId=e.eventId
+               inner join category c on e.categoryId=c.categoryID
+               inner join city ci on e.cityCode=ci.cityId
+               inner join organization o on o.orgID=e.orgId
+               WHERE r.userId = ?
+               order by r.reservationTime desc`;
 
   mysql.query(sql, [id], (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
-      const orderItems = results;
+      const reserve = results;
 
-      res.render("user/order-history", { orderItems: orderItems });
+      res.render("user/MyReservations", { reserve: reserve });
     } else {
-      res.render("user/order-history", { orderItems: null });
+      res.render("user/MyReservations", { reserve: null });
     }
   });
 });

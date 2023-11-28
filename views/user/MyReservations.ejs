@@ -9,48 +9,43 @@
     <div>
         <table class="table">
             <tr>
-                <th>Item Name</th>
-                <th>Shop Name</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total Price</th>
-                <th>Status</th>
+                <th>Event Name</th>
+                <th>Organiztion Name</th>
+                <th>Category</th>
+                <th>City</th>
+                <th>Tickets</th>
+                <th>Total amount</th>
+                <th>Reservation Time </th>
             </tr>
             <% 
-            if(orderItems!=null)
+            if(reserve!=null)
             {
                 let total = 0;
 
-                orderItems.forEach(item => {
+                reserve.forEach(item => {
             %>
-            <tr class="order-item">
-                <td><%= item.itemName%></td>
-                <td><%= item.name%></td>
-                <td><%= item.quantity %></td>
-                <td><%= item.price %></td>
-                <td><%= parseFloat(item.quantity) * parseFloat(item.price) %></td>
-                <td><%= item.order_status %></td>
-                
+            <tr class="order-item"> 
+                <td><%= item.eventName%></td>
+                <td><%= item.org%></td>
+                <td><%= item.name %></td>
+                <td><%= item.cityName %></td>
+                <td><%= item.ticket_quantity%></td>
+                <td><%= item.total_amount %></td>
+                <td><%=item.reservationTime%></td>
             </tr>
-            <%
-                    total += parseFloat(item.quantity) * parseFloat(item.price);
-                })
-            %>
-            <tr>
-                <td colspan="3" aling="right"><b>Total</b></td>
-                <td><%= total %></td>
-                <td>&nbsp;</td>
-            </tr>
+           
+            
                
                 
             <%
-            }
+            });
+             }
             else
             {
             %>
 
             <tr>
-                <td colspan="5" align="center">No order yet</td>
+                <td colspan="5" align="center">No Reservation yet</td>
             </tr>
 
             <%

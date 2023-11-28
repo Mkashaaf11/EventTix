@@ -383,7 +383,48 @@ router.delete("/events/delete/:id", ensureAuthenticated, (req, res) => {
     res.redirect("/org/events");
   });
 });
+router.get("/myreservations", ensureAuthenticated, (req, res) => {
+  const user = req.session.user;
+  const id = user.id;
+  const sql=`select r.eventId,count(*) as "count" from reservation r 
+             inner join event e on r.eventId=e.eventId 
+             where orgId=?
+             group by r.eventId`;
 
+  mysql.query(sql, [id], (err, results) => {
+    const events = results;
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error Querying database");
+    } else if (results.length > 0) {
+      
+      const sql1 = `SELECT e.eventName,u.username,c.name,ci.cityName,r.ticket_quantity,r.total_amount,r.reservationTime
+               FROM reservation r inner join event e  on r.eventId=e.eventId
+               inner join category c on e.categoryId=c.categoryID
+               inner join city ci on e.cityCode=ci.cityId
+               inner join user u o on u.id=r.userId
+               WHERE e.orgId = ?
+               order by r.reservationTime desc`;
+      mysql.query(sql1, [id], (err, results1) => {
+        const reserve=results1;
+      if(err){
+        console.error(err);
+        res.status(500).send("Error Querying database");
+
+      }
+      else if(results1.length>0){
+      res.render("user/MyReservations", { reserve: reserve,events:events });
+      }
+      else{
+        res.render("user/MyReservations", { reserve: null,events:events });
+      }
+      
+      });
+    } else {
+      res.render("user/MyReservations", { reserve: null,events:null });
+    }
+  });
+});
 router.get("/profile", ensureAuthenticated, (req, res) => {
   //see profile
   res.render("organization/profile");

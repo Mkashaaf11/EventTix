@@ -6,7 +6,11 @@
     <title>Document</title>
   </head>
   <body>
-    <div>
+     <div>
+      <% if (messages.success) { %>
+        <div><%= messages.success %></div>
+      <%}%> 
+
       <% if(events != null && events.length > 0) { %>
       <ol>
         <% events.forEach(event => { %>
