@@ -6,10 +6,12 @@ class Event {
     TotalTickets,
     RemainingTickets,
     eventDate,
+    endDate,
     eventTime,
     Description,
     categoryId,
-    cityCode
+    cityCode,
+    status
   ) {
     this.eventName = eventName;
     this.price = price;
@@ -17,10 +19,12 @@ class Event {
     this.TotalTickets = TotalTickets;
     this.RemainingTickets = RemainingTickets;
     this.eventDate = eventDate;
+    this.endDate = endDate;
     this.eventTime = eventTime;
     this.Description = Description;
     this.categoryId = categoryId;
     this.cityCode = cityCode;
+    this.status = status;
   }
 }
 

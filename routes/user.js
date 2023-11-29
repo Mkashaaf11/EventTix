@@ -18,6 +18,15 @@ router.get("/", (req, res) => {
       req.flash("error", "server error");
       res.redirect("/user");
     } else if (result.length > 0) {
+      const timeIntervalCheck = "call  UpdateEventStatusClosed()";
+      mysql.query(timeIntervalCheck, (err, result) => {
+        if (err) {
+          console.error(err);
+          req.flash("error", "error changing status to closed");
+        } else {
+          console.log("Status changed to closed of some events");
+        }
+      });
       const categories = result;
       res.render("user/main", { categories: categories });
     } else {
@@ -129,7 +138,6 @@ router.post("/login", (req, res) => {
       res.redirect("/user/login");
     } else if (results.length > 0) {
       const user = results[0];
-     
 
       if (bcrypt.compareSync(password, user.password)) {
         req.session.user = user;
@@ -139,6 +147,7 @@ router.post("/login", (req, res) => {
         res.redirect("/user/login");
       }
     } else {
+      console.log("User not found");
       req.flash("error", "User not found. Please sign up.");
       res.redirect("/user/signup");
     }
@@ -174,6 +183,15 @@ router.get("/category/:id", (req, res) => {
       console.error(err);
       res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
+      const timeIntervalCheck = "call  UpdateEventStatusClosed()";
+      mysql.query(timeIntervalCheck, (err, result) => {
+        if (err) {
+          console.error(err);
+          req.flash("error", "error changing status to closed");
+        } else {
+          console.log("Status changed to closed of some events");
+        }
+      });
       const events = results;
 
       res.render("user/showevents", { events: events });
@@ -183,13 +201,12 @@ router.get("/category/:id", (req, res) => {
   });
 });
 
-
 router.get("/reserve/:id", ensureAuthenticated, (req, res) => {
-   const id=req.params.id;
-   const sql=`select eventId,eventName,price,eventDate,eventTime,description,cityName,name from   event e inner join city c
+  const id = req.params.id;
+  const sql = `select eventId,eventName,price,eventDate,eventTime,description,cityName,name from   event e inner join city c
               on c.cityId=e.cityCode inner join organization o on e.orgID=o.orgId
               where eventId=?`;
-   
+
   mysql.query(sql, [id], (err, results) => {
     if (err) {
       console.error(err);
@@ -207,39 +224,46 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
   const eventId = req.body.eventId;
   const quantity = req.body.quantity;
   const user = req.session.user;
-  const price=req.body.price;
-  const newReservation = new Reservation(eventId, user.id, quantity,price); 
-   const sql = "insert into reservation(userId,eventId,ticket_quantity,total_amount) values(?,?,?,?)";
-   mysql.query(sql, [newReservation.uid,newReservation.eventId,newReservation.quantity,newReservation.amount], (err, results) => {
-    if (err) {
-      if(err.sqlState==='45000'){
-        req.flash("error", "Not enough tickets are available");
-        res.status(500).redirect(`/user/reserve/${eventId}`);
-      }
-      else{
-      console.error(err);
-      res.status(500).send({ success: false, message: "Error booking event" });
-      }
-    }
-    else{
-         const sql1="select categoryId from event where eventId=?";
-         mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
+  const price = req.body.price;
+  const newReservation = new Reservation(eventId, user.id, quantity, price);
+  const sql =
+    "insert into reservation(userId,eventId,ticket_quantity,total_amount) values(?,?,?,?)";
+  mysql.query(
+    sql,
+    [
+      newReservation.uid,
+      newReservation.eventId,
+      newReservation.quantity,
+      newReservation.amount,
+    ],
+    (err, results) => {
+      if (err) {
+        if (err.sqlState === "45000") {
+          req.flash("error", "Not enough tickets are available");
+          res.status(500).redirect(`/user/reserve/${eventId}`);
+        } else {
+          console.error(err);
+          res
+            .status(500)
+            .send({ success: false, message: "Error booking event" });
+        }
+      } else {
+        const sql1 = "select categoryId from event where eventId=?";
+        mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
           if (err1) {
             console.error(err1);
             res
               .status(500)
               .send({ success: false, message: "Error Refreshing" });
+          } else if (results1.length > 0) {
+            const cat = results1[0].categoryId;
+            req.flash("success", "Your reservation is successful");
+            res.redirect(`/user/category/${cat}`);
           }
-          else if(results1.length>0){
-           const cat=results1[0].categoryId; 
-           req.flash("success", "Your reservation is successful");
-           res.redirect(`/user/category/${cat}`);
-        }
-         });
-     }
-    
-
-  });
+        });
+      }
+    }
+  );
 });
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.user;
@@ -257,6 +281,15 @@ router.get("/myreservations", ensureAuthenticated, (req, res) => {
       console.error(err);
       res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
+      const timeIntervalCheck = "call  UpdateEventStatusClosed()";
+      mysql.query(timeIntervalCheck, (err, result) => {
+        if (err) {
+          console.error(err);
+          req.flash("error", "error changing status to closed");
+        } else {
+          console.log("Status changed to closed of some events");
+        }
+      });
       const reserve = results;
 
       res.render("user/MyReservations", { reserve: reserve });

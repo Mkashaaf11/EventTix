@@ -165,10 +165,12 @@ router.post("/events/add", (req, res) => {
   const TotalTickets = req.body.TotalTickets;
   const RemainingTickets = req.body.RemainingTickets;
   const eventDate = req.body.eventDate;
+  const endDate = req.body.endDate;
   const eventTime = req.body.eventTime;
   const Description = req.body.Description;
   const categoryId = req.body.category;
   const cityCode = req.body.cityId;
+  const status = req.body.status;
 
   if (
     RemainingTickets > TotalTickets ||
@@ -181,6 +183,12 @@ router.post("/events/add", (req, res) => {
     );
     res.redirect("/org/events/add");
   }
+
+  if (endDate < eventDate) {
+    req.flash("error", "Event ending date cant be less than actual date");
+    res.redirect("/org/events/add");
+  }
+
   // Check if the organization with the specified orgId exists
   const orgSql = "SELECT * FROM organization WHERE orgID = ?";
   mysql.query(orgSql, [orgId], (err, orgResult) => {
@@ -197,14 +205,16 @@ router.post("/events/add", (req, res) => {
         TotalTickets,
         RemainingTickets,
         eventDate,
+        endDate,
         eventTime,
         Description,
         categoryId,
-        cityCode
+        cityCode,
+        status
       );
 
       const eventSql =
-        "INSERT INTO event(eventName, price, orgId,TotalTickets,RemainingTickets,eventDate,eventTime,Description,categoryId,cityCode) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        "INSERT INTO event(eventName, price, orgId,TotalTickets,RemainingTickets,eventDate,endDate,eventTime,Description,categoryId,cityCode,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
       // Insert the event into the database
       mysql.query(
@@ -216,10 +226,12 @@ router.post("/events/add", (req, res) => {
           newEvent.TotalTickets,
           newEvent.RemainingTickets,
           newEvent.eventDate,
+          newEvent.endDate,
           newEvent.eventTime,
           newEvent.Description,
           newEvent.categoryId,
           newEvent.cityCode,
+          newEvent.status,
         ],
         (err, eventResult) => {
           if (err) {
@@ -306,6 +318,7 @@ router.put("/events/update/:id", (req, res) => {
   const TotalTickets = req.body.TotalTickets;
   const RemainingTickets = req.body.RemainingTickets;
   const eventDate = req.body.eventDate;
+  const endDate = req.body.endDate;
   const eventTime = req.body.eventTime;
   const Description = req.body.Description;
   const categoryId = req.body.category;
@@ -324,6 +337,11 @@ router.put("/events/update/:id", (req, res) => {
     );
     res.redirect("/org/events/update/:id");
   }
+
+  if (endDate < eventDate) {
+    req.flash("error", "Event ending date cant be less than actual date");
+    res.redirect("/org/events/add");
+  }
   const newEvent = new Events(
     eventName,
     price,
@@ -331,6 +349,7 @@ router.put("/events/update/:id", (req, res) => {
     TotalTickets,
     RemainingTickets,
     eventDate,
+    endDate,
     eventTime,
     Description,
     categoryId,
@@ -338,7 +357,7 @@ router.put("/events/update/:id", (req, res) => {
   );
 
   const updateSql =
-    "UPDATE event SET eventName = ?, price = ?, orgId = ?, TotalTickets=?, RemainingTickets=?, eventDate=?, eventTime=?, Description=?, categoryId=?, cityCode=? WHERE eventId = ?";
+    "UPDATE event SET eventName = ?, price = ?, orgId = ?, TotalTickets=?, RemainingTickets=?, eventDate=?,endDate=?, eventTime=?, Description=?, categoryId=?, cityCode=? WHERE eventId = ?";
 
   mysql.query(
     updateSql,
@@ -349,6 +368,7 @@ router.put("/events/update/:id", (req, res) => {
       newEvent.TotalTickets,
       newEvent.RemainingTickets,
       newEvent.eventDate,
+      newEvent.endDate,
       newEvent.eventTime,
       newEvent.Description,
       newEvent.categoryId,
@@ -368,21 +388,23 @@ router.put("/events/update/:id", (req, res) => {
   );
 });
 
-router.delete("/events/delete/:id", ensureAuthenticated, (req, res) => {
+router.delete("/events/cancel/:id", ensureAuthenticated, (req, res) => {
   // delete events
   const eventId = req.params.id;
-  const deleteSql = "DELETE FROM event WHERE eventId = ?";
 
-  mysql.query(deleteSql, [eventId], (err, result) => {
+  const cancelEventSql = "CALL cancelEvent(?)";
+
+  mysql.query(cancelEventSql, [eventId], (err, result) => {
     if (err) {
       console.error(err);
-      req.flash("error", "Error deleting event. Please try again.");
+      req.flash("error", "Error canceling event. Please try again.");
     } else {
-      req.flash("success", "Event deleted successfully!");
+      req.flash("success", "Event canceled successfully!");
     }
     res.redirect("/org/events");
   });
 });
+
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.organization;
   const id = user.orgID;
