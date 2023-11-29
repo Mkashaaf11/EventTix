@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+        <% 
+        if(events!=null)
+        {
+            let total = 0;
+
+            events.forEach(event =>{    
+        %>
+        <div><h1><%= event.eventName%></h1></div>
+        <ol class="hideIt">     
+        <%if(event.count>0){
+          reserve.forEach(e=>{ 
+        %>
+
+        <li> 
+            <div>Name: <%= e.username%></div>
+            <div>City: <%= e.cityName %></div>
+            <div>Tickets booked: <%= e.ticket_quantity %></div>
+            <div>Total Amount: <%= e.total_amount%></div>
+            <div>Reservation Time: <%= e.reservationTime %></div>
+        </li>   
+       
+        
+         <% });
+        
+        }
+         else{ %>
+        <div>No reservations Yet!</div>
+        <%}%>   
+        
+        <%
+        });
+         }
+        else
+        {
+        %>
+            <div>No events available!</div>
+        <%
+        }
+        %>
+</body>
+</html>
