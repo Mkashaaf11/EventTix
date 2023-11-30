@@ -8,30 +8,88 @@ const Reservation = require("../models/reservation");
 const Order = require("../models/order");
 const { isEmail, isLength } = require("validator");
 const { closeDelimiter } = require("ejs");
+router.get("/", ensureAuthenticated, (req, res) => {
+  const getCategorySql =
+    "SELECT categoryID, name, description FROM category ORDER BY categoryID ASC";
 
-router.get("/", (req, res) => {
-  const sql =
-    "SELECT categoryID,name,description FROM category order by categoryID asc";
-  mysql.query(sql, (err, result) => {
-    if (err) {
-      console.error(err);
-      req.flash("error", "server error");
-      res.redirect("/user");
-    } else if (result.length > 0) {
-      const timeIntervalCheck = "call  UpdateEventStatusClosed()";
-      mysql.query(timeIntervalCheck, (err, result) => {
-        if (err) {
-          console.error(err);
-          req.flash("error", "error changing status to closed");
-        } else {
-          console.log("Status changed to closed of some events");
-        }
-      });
-      const categories = result;
-      res.render("user/main", { categories: categories });
-    } else {
-      res.render("user/main", { categories: null });
+  mysql.query(getCategorySql, (categoryErr, categoriesResult) => {
+    if (categoryErr) {
+      console.error(categoryErr);
+      req.flash("error", "Server error (Categories)");
+      return res.redirect("/user");
     }
+
+    const categories = categoriesResult;
+
+    const updateStatusSql = "CALL UpdateEventStatusClosed()";
+
+    mysql.query(updateStatusSql, (updateStatusErr) => {
+      if (updateStatusErr) {
+        console.error(updateStatusErr);
+      } else {
+        console.log("Status changed to closed for some events");
+      }
+
+      const getRecommendationsSql = `
+      SELECT e.eventName, e.price, e.eventDate, e.eventTime, ct.cityName
+      FROM event e
+      INNER JOIN city ct ON e.cityCode = ct.cityId
+      INNER JOIN (
+          SELECT c.categoryID
+          FROM category c
+          INNER JOIN event ev ON c.categoryID = ev.categoryId
+          INNER JOIN reservation r ON ev.eventId = r.eventId
+          WHERE r.userId = ?
+          GROUP BY c.categoryID
+          ORDER BY COUNT(*) DESC
+          LIMIT 5
+      ) AS subquery ON e.categoryID = subquery.categoryID;
+      
+      `;
+
+      mysql.query(
+        getRecommendationsSql,
+        [req.session.user.id],
+        (recErr, recResult) => {
+          if (recErr) {
+            console.error(recErr);
+            req.flash("error", "Server error (Recommendations)");
+            return res.redirect("/user");
+          }
+
+          const getNewSql = `
+          SELECT e.eventName, e.price, e.eventDate, e.eventTime, ct.cityName
+          FROM event e
+          INNER JOIN city ct ON e.cityCode = ct.cityId
+          LEFT JOIN (
+              SELECT c.categoryID
+              FROM category c
+              INNER JOIN event ev ON c.categoryID = ev.categoryId
+              INNER JOIN reservation r ON ev.eventId = r.eventId
+              WHERE r.userId = ?
+              GROUP BY c.categoryID
+              ORDER BY COUNT(*) DESC
+              LIMIT 5
+          ) AS subquery ON e.categoryID = subquery.categoryID
+          WHERE subquery.categoryID IS NULL;
+          
+          `;
+
+          mysql.query(getNewSql, [req.session.user.id], (NewErr, NewResult) => {
+            if (NewErr) {
+              console.error(NewErr);
+              req.flash("error", "Server error (New Events)");
+              return res.redirect("/user");
+            }
+
+            const recommendation = recResult.length > 0 ? recResult : null;
+            const newToYou = NewResult.length > 0 ? NewResult : null;
+
+            res.render("user/main", { categories, recommendation, newToYou });
+          });
+        }
+      );
+    });
   });
 });
 
@@ -76,13 +134,7 @@ router.post("/signup", (req, res) => {
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     // Create a user object
-    const newUser = {
-      username: userName,
-      email: email,
-      password: hashedPassword,
-      age: age,
-      cityId: cityId,
-    };
+    const newUser = new User(userName, email, password, age, cityId);
 
     // Define the SQL query
     const sql =
@@ -94,7 +146,7 @@ router.post("/signup", (req, res) => {
       [
         newUser.username,
         newUser.email,
-        newUser.password,
+        hashedPassword,
         newUser.age,
         newUser.cityId,
       ],
@@ -175,8 +227,9 @@ router.get("/logout", (req, res) => {
 });
 
 router.get("/category/:id", (req, res) => {
-  const sql =
-    "SELECT eventId,eventName,price,orgId,TotalTickets,RemainingTickets,eventDate,eventTime,Description,categoryId,cityCode FROM event WHERE categoryId = ?";
+  const sql = `SELECT eventId,eventName,price,orgId,TotalTickets,RemainingTickets,eventDate,
+    eventTime,Description,categoryId,cityCode FROM event WHERE categoryId = ?`;
+
   const id = req.params.id;
   mysql.query(sql, [id], (err, results) => {
     if (err) {

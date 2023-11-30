@@ -213,8 +213,8 @@ router.post("/events/add", (req, res) => {
         status
       );
 
-      const eventSql =
-        "INSERT INTO event(eventName, price, orgId,TotalTickets,RemainingTickets,eventDate,endDate,eventTime,Description,categoryId,cityCode,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+      const eventSql = `INSERT INTO event(eventName, price, orgId,TotalTickets,RemainingTickets,eventDate,endDate,eventTime,Description,categoryId,cityCode,status)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`;
 
       // Insert the event into the database
       mysql.query(
@@ -356,8 +356,11 @@ router.put("/events/update/:id", (req, res) => {
     cityCode
   );
 
-  const updateSql =
-    "UPDATE event SET eventName = ?, price = ?, orgId = ?, TotalTickets=?, RemainingTickets=?, eventDate=?,endDate=?, eventTime=?, Description=?, categoryId=?, cityCode=? WHERE eventId = ?";
+  const updateSql = `UPDATE event SET eventName = ?, price = ?, orgId = ?, TotalTickets=?,
+     RemainingTickets=?, eventDate=?,
+    endDate=?, eventTime=?, Description=?, 
+    categoryId=?, cityCode=?
+     WHERE eventId = ?`;
 
   mysql.query(
     updateSql,
@@ -408,7 +411,7 @@ router.delete("/events/cancel/:id", ensureAuthenticated, (req, res) => {
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.organization;
   const id = user.orgID;
-  const sql=`select e.eventName,count(*) as "count" from reservation r 
+  const sql = `select e.eventName,count(*) as "count" from reservation r 
              inner join event e on r.eventId=e.eventId 
              where orgId=?
              group by r.eventId`;
@@ -419,7 +422,6 @@ router.get("/myreservations", ensureAuthenticated, (req, res) => {
       console.error(err);
       res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
-      
       const sql1 = `SELECT u.username,ci.cityName,r.ticket_quantity,r.total_amount,r.reservationTime
                FROM reservation r inner join event e  on r.eventId=e.eventId
                inner join category c on e.categoryId=c.categoryID
@@ -427,23 +429,29 @@ router.get("/myreservations", ensureAuthenticated, (req, res) => {
                inner join users u  on u.id=r.userId
                WHERE e.orgId = ?
                order by r.reservationTime desc`;
-      mysql.query(sql1, [id], (err, results1) => {
-        const reserve=results1;
-      if(err){
-        console.error(err);
-        res.status(500).send("Error Querying database");
 
-      }
-      else if(results1.length>0){
-      res.render("organization/myreservations", { reserve: reserve,events:events });
-      }
-      else{
-        res.render("organization/myreservations", { reserve: null,events:events });
-      }
-      
+      mysql.query(sql1, [id], (err, results1) => {
+        const reserve = results1;
+        if (err) {
+          console.error(err);
+          res.status(500).send("Error Querying database");
+        } else if (results1.length > 0) {
+          res.render("organization/myreservations", {
+            reserve: reserve,
+            events: events,
+          });
+        } else {
+          res.render("organization/myreservations", {
+            reserve: null,
+            events: events,
+          });
+        }
       });
     } else {
-      res.render("organization/myreservations", { reserve: null,events:null });
+      res.render("organization/myreservations", {
+        reserve: null,
+        events: null,
+      });
     }
   });
 });
