@@ -6,13 +6,50 @@
     <title>Document</title>
   </head>
   <body>
-     
+    <div>
+      <h2>New Events For you</h2>
+      <ul>
+        <% if(newToYou && newToYou.length > 0) { %> <% newToYou.forEach(event =>
+        { %>
+        <li>
+          <%= event.eventName%> - <%= event.price %> - <%= event.eventDate %> -
+          <%= event.eventTime %> - <%= event.cityName %>
+          <form action="/user/reserve/<%=event.eventId%>">
+            <input type="submit" value="Book Now" />
+          </form>
+        </li>
+        <% })%> <% } else { %>
+        <li>No New Event For You at the moment</li>
+        <% }%>
+      </ul>
+    </div>
+
+    <div>
+      <h2>Recommended Events For you</h2>
+      <ul>
+        <% if(recommendation && recommendation.length > 0) { %> <%
+        recommendation.forEach(event => { %>
+        <li>
+          <%= event.eventName%> - <%= event.price %> - <%= event.eventDate %> -
+          <%= event.eventTime %> - <%= event.cityName %>
+          <form action="/user/reserve/<%=event.eventId%>">
+            <input type="submit" value="Book Now" />
+          </form>
+        </li>
+        <% })%> <% } else { %>
+        <li>
+          Hurry up and book some events so we help you with some recommendation
+        </li>
+        <% }%>
+      </ul>
+    </div>
+
     <div>
       <% if(categories != null){ %> <% categories.forEach(category => { %>
       <div>
         <a href="user/category/<%= category.categoryID %>">
           <div><%= category.name %></div>
-         <div><%= category.description %></div> 
+          <div><%= category.description %></div>
         </a>
       </div>
       <% }) %> <% } else { %>
