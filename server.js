@@ -36,6 +36,17 @@ app.use(
     store: sessionStore,
   })
 );
+app.use((req, res, next) => {
+  // Check user type based on the route or any other criteria
+  if (req.path.startsWith("/user")) {
+    res.locals.header = "../partials/header_user";
+  } else if (req.path.startsWith("/org")) {
+    res.locals.header = "../partials/header_org";
+  } else {
+    res.locals.header = "../partials/header_main";
+  }
+  next();
+});
 
 const indexRouter = require("./routes/index");
 const userRouter = require("./routes/user");

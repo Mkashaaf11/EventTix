@@ -9,76 +9,65 @@ const { isEmail, isLength } = require("validator");
 router.get("/dashboard", ensureAuthenticated, (req, res) => {
   const user = req.session.organization;
   const id = user.orgID;
-   const sql1=`select * from event 
+  const sql1 = `select * from event 
                 where orgId=? and status IN ('Active','Sold Out')`;
-   const sql2=`select e.eventId,e.eventName,u.age,count(*) as "count" from event e 
+  const sql2 = `select e.eventId,e.eventName,u.age,count(*) as "count" from event e 
                inner join reservation r on e.eventId=r.eventId
                inner join users u on u.id=r.userId
                where e.orgId=?
-               group by e.eventId,u.age`;  
-   const sql3=`select e.eventId,e.eventName,c.cityName,count(*) as "count" from event e 
+               group by e.eventId,u.age`;
+  const sql3 = `select e.eventId,e.eventName,c.cityName,count(*) as "count" from event e 
                inner join reservation r on e.eventId=r.eventId
                inner join users u on u.id=r.userId
                inner join city c on c.cityId=u.cityId
                where e.orgId=?
-               group by e.eventId,c.cityName`
+               group by e.eventId,c.cityName`;
 
-   const sql4=`select c.name,count(*) as "count" from reservation r
+  const sql4 = `select c.name,count(*) as "count" from reservation r
                   inner join  event e on e.eventId=r.eventId
                   inner join category c on c.categoryID=e.categoryId
                   group by c.name
-                  order by count(*) desc LIMIT 5`            
+                  order by count(*) desc LIMIT 5`;
 
-  mysql.query(sql1,[id],(err1, results1)=>{
-    if(err1){
+  mysql.query(sql1, [id], (err1, results1) => {
+    if (err1) {
       console.error(err1);
       res.status(500).send("Error Querying database");
-    }
-    else if(results1.length>0){
-      mysql.query(sql2,[id],(err2, results2)=>{
-        if(err2){
+    } else if (results1.length > 0) {
+      mysql.query(sql2, [id], (err2, results2) => {
+        if (err2) {
           console.error(err2);
           res.status(500).send("Error Querying database");
-        }
-        else if(results2.length>0){
-          mysql.query(sql3,[id],(err3, results3)=>{
-            if(err3){
+        } else if (results2.length > 0) {
+          mysql.query(sql3, [id], (err3, results3) => {
+            if (err3) {
               console.error(err3);
               res.status(500).send("Error Querying database");
-            }
-            else if(results3.length>0){
-              mysql.query(sql4,(err4, results4)=>{
-                if(err4){
+            } else if (results3.length > 0) {
+              mysql.query(sql4, (err4, results4) => {
+                if (err4) {
                   console.error(err4);
                   res.status(500).send("Error Querying database");
+                } else if (results4.length > 0) {
+                  const events = results1;
+                  const age = results2;
+                  const city = results3;
+                  const categ = results4;
+                  res.render("organization/dashboard", {
+                    events: events,
+                    age: age,
+                    city: city,
+                    categ: categ,
+                  });
                 }
-                else if(results4.length>0){
-                   const events=results1;
-                   const age=results2;
-                   const city=results3;
-                   const categ=results4;
-                   res.render("organization/dashboard", {events:events,age:age,city:city,categ:categ});
-                }
-                 
-                     
-              });         
+              });
             }
-             
-                 
           });
-    
-          
         }
-         
-             
       });
-
-
     }
-     
-         
   });
-  
+
   res.render("organization/main");
 });
 
@@ -105,42 +94,61 @@ router.post("/signup", (req, res) => {
       return;
     }
 
-    const newOrg = new Organization(name, userName, email, password);
-    const sql =
-      "INSERT INTO organization(name,email,username,password) VALUES (?,?,?,?)";
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const blockSql = `SELECT * FROM restrictor WHERE email= ? `;
+    mysql.query(blockSql, [email], (err, blockresult) => {
+      if (err) {
+        console.error(err);
+        req.flash("error", "Server Error. Please try again.");
+        res.redirect("/org/signup");
+      } else if (blockresult.length > 0) {
+        req.flash(
+          "error",
+          "You are blocked due to violating our terms and conditions"
+        );
+        res.redirect("/");
+      } else {
+        const newOrg = new Organization(name, userName, email, password);
+        const sql =
+          "INSERT INTO organization(name,email,username,password) VALUES (?,?,?,?)";
+        const hashedPassword = bcrypt.hashSync(password, 10);
 
-    mysql.query(
-      sql,
-      [newOrg.name, newOrg.email, newOrg.username, hashedPassword],
-      (err, results) => {
-        if (err) {
-          console.error(err);
-          if (err.code === "ER_DUP_ENTRY") {
-            req.flash(
-              "error",
-              "Username already exists. Please choose a different one."
-            );
-            res
-              .status(409)
-              .send("Username already exists. Please choose a different one.");
-          } else {
-            req.flash(
-              "error",
-              "Error creating organization. Check username uniqueness."
-            );
-            res
-              .status(500)
-              .send("Error creating organization. Check username uniqueness.");
+        mysql.query(
+          sql,
+          [newOrg.name, newOrg.email, newOrg.username, hashedPassword],
+          (err, results) => {
+            if (err) {
+              console.error(err);
+              if (err.code === "ER_DUP_ENTRY") {
+                req.flash(
+                  "error",
+                  "Username already exists. Please choose a different one."
+                );
+                res
+                  .status(409)
+                  .send(
+                    "Username already exists. Please choose a different one."
+                  );
+              } else {
+                req.flash(
+                  "error",
+                  "Error creating organization. Check username uniqueness."
+                );
+                res
+                  .status(500)
+                  .send(
+                    "Error creating organization. Check username uniqueness."
+                  );
+              }
+            } else {
+              // Seller registration successful
+              req.flash("success", "organization registration successful.");
+              console.log("organization registration successful.");
+              res.redirect("/org/login");
+            }
           }
-        } else {
-          // Seller registration successful
-          req.flash("success", "organization registration successful.");
-          console.log("organization registration successful.");
-          res.redirect("/org/login");
-        }
+        );
       }
-    );
+    });
   } catch (error) {
     console.error(error);
     req.flash("error", "Internal Server Error");
@@ -166,14 +174,33 @@ router.post("/login", (req, res) => {
       res.redirect("/org/login"); // Redirect on error
     } else if (result.length > 0) {
       const organization = result[0];
-      if (bcrypt.compareSync(password, organization.password)) {
-        req.session.organization = organization;
-        req.flash("success", "Login successful. Welcome to your dashboard!");
-        res.redirect("/org/dashboard");
-      } else {
-        req.flash("error", "Password does not match. Please try again.");
-        res.redirect("/org/login"); // Redirect on incorrect password
-      }
+
+      const blockSql = `SELECT * FROM restrictor WHERE email= ? `;
+      mysql.query(blockSql, [organization.email], (err, blockresult) => {
+        if (err) {
+          console.error(err);
+          req.flash("error", "Server Error. Please try again.");
+          res.redirect("/org/login");
+        } else if (blockresult.length > 0) {
+          req.flash(
+            "error",
+            "You are blocked due to violating our terms and conditions"
+          );
+          res.redirect("/");
+        } else {
+          if (bcrypt.compareSync(password, organization.password)) {
+            req.session.organization = organization;
+            req.flash(
+              "success",
+              "Login successful. Welcome to your dashboard!"
+            );
+            res.redirect("/org/dashboard");
+          } else {
+            req.flash("error", "Password does not match. Please try again.");
+            res.redirect("/org/login"); // Redirect on incorrect password
+          }
+        }
+      });
     } else {
       req.flash("error", "User not found. Please sign up.");
       res.redirect("/org/signup"); // Redirect if user not found
@@ -480,9 +507,10 @@ router.delete("/events/cancel/:id", ensureAuthenticated, (req, res) => {
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.organization;
   const id = user.orgID;
-  const sql=`select r.eventId,e.eventName,count(*),e.TotalTickets,e.RemainingTickets as "count" from reservation r 
+  console.log(id);
+  const sql = `select r.eventId,e.eventName,count(*),e.TotalTickets,e.RemainingTickets as "count" from reservation r 
              inner join event e on r.eventId=e.eventId 
-             where orgId=?
+             where e.orgId=?
              group by r.eventId`;
 
   mysql.query(sql, [id], (err, results) => {
@@ -491,7 +519,6 @@ router.get("/myreservations", ensureAuthenticated, (req, res) => {
       console.error(err);
       res.status(500).send("Error Querying database");
     } else if (results.length > 0) {
-      
       const sql1 = `SELECT r.eventId,u.username,ci.cityName,r.ticket_quantity,r.total_amount,DATE_FORMAT(r.reservationTime, '%Y-%m-%d %h:%i %p') AS "reservationTime"
                     FROM reservation r inner join event e  on r.eventId=e.eventId
                     inner join category c on e.categoryId=c.categoryID
@@ -500,22 +527,27 @@ router.get("/myreservations", ensureAuthenticated, (req, res) => {
                     WHERE e.orgId = ?
                     order by r.reservationTime desc`;
       mysql.query(sql1, [id], (err, results1) => {
-        const reserve=results1;
-      if(err){
-        console.error(err);
-        res.status(500).send("Error Querying database");
-
-      }
-      else if(results1.length>0){
-      res.render("organization/myreservations", { reserve: reserve,events:events });
-      }
-      else{
-        res.render("organization/myreservations", { reserve: null,events:events });
-      }
-      
+        const reserve = results1;
+        if (err) {
+          console.error(err);
+          res.status(500).send("Error Querying database");
+        } else if (results1.length > 0) {
+          res.render("organization/myreservations", {
+            reserve: reserve,
+            events: events,
+          });
+        } else {
+          res.render("organization/myreservations", {
+            reserve: null,
+            events: events,
+          });
+        }
       });
     } else {
-      res.render("organization/myreservations", { reserve: null,events:null });
+      res.render("organization/myreservations", {
+        reserve: null,
+        events: null,
+      });
     }
   });
 });

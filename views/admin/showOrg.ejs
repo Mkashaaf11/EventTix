@@ -1,0 +1,16 @@
+<div>
+  <ol>
+    <% if (org!=null) { %> <% org.forEach(user => { %>
+    <li class="list-item">
+      <span>name:<%= user.name %></span><br />
+      <span>Username:<%= user.username %></span><br />
+      <span>Email: <%= user.email %></span><br />
+
+      <form action="/admin/restrictOrg/<%=user.id%>">
+        <input type="submit" value="Restrict" />
+      </form>
+    </li>
+
+    <% }); %> <% } %>
+  </ol>
+</div>

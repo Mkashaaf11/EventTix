@@ -130,44 +130,60 @@ router.post("/signup", (req, res) => {
       return;
     }
 
-    // Hash the password
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const blockSql = `SELECT * FROM restrictor WHERE email= ? `;
+    mysql.query(blockSql, [email], (err, blockresult) => {
+      if (err) {
+        console.error(err);
+        req.flash("error", "Server Error. Please try again.");
+        res.redirect("/user/signup");
+      } else if (blockresult.length > 0) {
+        req.flash(
+          "error",
+          "You are blocked due to violating our terms and conditions"
+        );
+        res.redirect("/");
+      } else {
+        // Hash the password
+        const hashedPassword = bcrypt.hashSync(password, 10);
 
-    // Create a user object
-    const newUser = new User(userName, email, password, age, cityId);
+        // Create a user object
+        const newUser = new User(userName, email, password, age, cityId);
+        // Define the SQL query
+        const sql =
+          "INSERT INTO users (username, email, password, age, cityId) VALUES (?, ?, ?, ?, ?)";
+        mysql.query(
+          sql,
+          [
+            newUser.username,
+            newUser.email,
+            hashedPassword,
+            newUser.age,
+            newUser.cityId,
+          ],
+          (err, results) => {
+            if (err) {
+              console.error(err);
 
-    // Define the SQL query
-    const sql =
-      "INSERT INTO users (username, email, password, age, cityId) VALUES (?, ?, ?, ?, ?)";
+              // Check for duplicate username error
+              if (err.code === "ER_DUP_ENTRY") {
+                res
+                  .status(400)
+                  .send(
+                    "Username already exists. Please choose a different one."
+                  );
+              } else {
+                res.status(500).send("Error creating user.");
+              }
+            } else {
+              // User registration successful
+              res.redirect("/user/login");
+            }
+          }
+        );
+      }
+    });
 
     // Execute the query
-    mysql.query(
-      sql,
-      [
-        newUser.username,
-        newUser.email,
-        hashedPassword,
-        newUser.age,
-        newUser.cityId,
-      ],
-      (err, results) => {
-        if (err) {
-          console.error(err);
-
-          // Check for duplicate username error
-          if (err.code === "ER_DUP_ENTRY") {
-            res
-              .status(400)
-              .send("Username already exists. Please choose a different one.");
-          } else {
-            res.status(500).send("Error creating user.");
-          }
-        } else {
-          // User registration successful
-          res.redirect("/user/login");
-        }
-      }
-    );
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
@@ -191,13 +207,28 @@ router.post("/login", (req, res) => {
     } else if (results.length > 0) {
       const user = results[0];
 
-      if (bcrypt.compareSync(password, user.password)) {
-        req.session.user = user;
-                  res.redirect("/user");
-               } else {
-        req.flash("error", "Incorrect password. Please try again.");
-        res.redirect("/user/login");
-      }
+      const blockSql = `SELECT * FROM restrictor WHERE email= ? `;
+      mysql.query(blockSql, [user.email], (err, blockresult) => {
+        if (err) {
+          console.error(err);
+          req.flash("error", "Server Error. Please try again.");
+          res.redirect("/user/login");
+        } else if (blockresult.length > 0) {
+          req.flash(
+            "error",
+            "You are blocked due to violating our terms and conditions"
+          );
+          res.redirect("/");
+        } else {
+          if (bcrypt.compareSync(password, user.password)) {
+            req.session.user = user;
+            res.redirect("/user");
+          } else {
+            req.flash("error", "Incorrect password. Please try again.");
+            res.redirect("/user/login");
+          }
+        }
+      });
     } else {
       console.log("User not found");
       req.flash("error", "User not found. Please sign up.");
@@ -279,45 +310,73 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
   const user = req.session.user;
   const price = req.body.price;
   const newReservation = new Reservation(eventId, user.id, quantity, price);
-  const sql =
-    "insert into reservation(userId,eventId,ticket_quantity,total_amount) values(?,?,?,?)";
-  mysql.query(
-    sql,
-    [
-      newReservation.uid,
-      newReservation.eventId,
-      newReservation.quantity,
-      newReservation.amount,
-    ],
-    (err, results) => {
-      if (err) {
-        if (err.sqlState === "45000") {
-          req.flash("error", "Not enough tickets are available");
-          res.status(500).redirect(`/user/reserve/${eventId}`);
-        } else {
-          console.error(err);
-          res
-            .status(500)
-            .send({ success: false, message: "Error booking event" });
-        }
-      } else {
-        const sql1 = "select categoryId from event where eventId=?";
-        mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
-          if (err1) {
-            console.error(err1);
-            res
-              .status(500)
-              .send({ success: false, message: "Error Refreshing" });
-          } else if (results1.length > 0) {
-            const cat = results1[0].categoryId;
-            req.flash("success", "Your reservation is successful");
-            res.redirect(`/user/category/${cat}`);
-          }
-        });
-      }
+
+  // Start a transaction
+  mysql.beginTransaction((err) => {
+    if (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .send({ success: false, message: "Error starting transaction" });
     }
-  );
+
+    const sql =
+      "INSERT INTO reservation(userId, eventId, ticket_quantity, total_amount) VALUES (?, ?, ?, ?)";
+    mysql.query(
+      sql,
+      [
+        newReservation.uid,
+        newReservation.eventId,
+        newReservation.quantity,
+        newReservation.amount,
+      ],
+      (err, results) => {
+        if (err) {
+          // Roll back the transaction on error
+          mysql.rollback(() => {
+            if (err.sqlState === "45000") {
+              req.flash("error", "Not enough tickets are available");
+              res.status(500).redirect(`/user/reserve/${eventId}`);
+            } else {
+              console.error(err);
+              res
+                .status(500)
+                .send({ success: false, message: "Error booking event" });
+            }
+          });
+        } else {
+          const sql1 = "SELECT categoryId FROM event WHERE eventId=?";
+          mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
+            if (err1) {
+              console.error(err1);
+              res
+                .status(500)
+                .send({ success: false, message: "Error refreshing" });
+            } else if (results1.length > 0) {
+              const cat = results1[0].categoryId;
+
+              // Commit the transaction if everything is successful
+              mysql.commit((commitErr) => {
+                if (commitErr) {
+                  // Roll back the transaction on commit error
+                  console.error(commitErr);
+                  return res.status(500).send({
+                    success: false,
+                    message: "Error committing transaction",
+                  });
+                }
+
+                req.flash("success", "Your reservation is successful");
+                res.redirect(`/user/category/${cat}`);
+              });
+            }
+          });
+        }
+      }
+    );
+  });
 });
+
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.user;
   const id = user.id;

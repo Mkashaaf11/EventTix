@@ -1,0 +1,17 @@
+<div>
+  <ol>
+    <% if (users!=null) { %> <% users.forEach(user => { %>
+    <li class="list-item">
+      <span>Username:<%= user.username %></span><br />
+      <span>Email: <%= user.email %></span><br />
+      <span>Age: <%= user.age%></span><br />
+      <span>City Name: <%= user.cityName %></span><br />
+
+      <form action="/admin/restrictUser/<%=user.id%>">
+        <input type="submit" value="Restrict" />
+      </form>
+    </li>
+
+    <% }); %> <% } %>
+  </ol>
+</div>
