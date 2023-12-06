@@ -4,9 +4,9 @@
   <li>
     Event Name: <%= events[i].eventName %><br />
     Price: <%= events[i].price %><br />
-    Category: <%= events[i].categoryId %> Status: <%= events[i].status %>
+    Category: <%= events[i].name %> Status: <%= events[i].status %>
   </li>
-  <%if(events[i].status!="Closed"&&events[i].status!="cancel"){%>
+  <%if(events[i].status!="Closed" && events[i].status!="cancelled"){%>
   <a href="/org/events/update/<%= events[i].eventId %>">Update</a>
   <form
     method="POST"

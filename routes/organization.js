@@ -214,7 +214,8 @@ router.get("/dashboard", ensureAuthenticated, (req, res) => {
 
 router.get("/events", ensureAuthenticated, (req, res) => {
   const orgID = req.session.organization.orgID;
-  const sql = "SELECT * FROM event WHERE orgId = ?";
+  const sql =
+    "SELECT e.eventName,e.price,e.status,c.name FROM event e INNER JOIN category c on e.categoryId=c.categoryID WHERE e.orgId = ?";
   mysql.query(sql, [orgID], (err, result) => {
     if (err) {
       console.log(err);

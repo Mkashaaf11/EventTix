@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
 const mysql = require("../db");
+const puppeteer = require("puppeteer");
 
 const User = require("../models/user");
 const Reservation = require("../models/reservation");
@@ -31,7 +32,7 @@ router.get("/", ensureAuthenticated, (req, res) => {
       }
 
       const getRecommendationsSql = `
-      SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId, ct.cityName
+      SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId,e.status, ct.cityName
       FROM event e
       INNER JOIN city ct ON e.cityCode = ct.cityId
       INNER JOIN (
@@ -58,7 +59,7 @@ router.get("/", ensureAuthenticated, (req, res) => {
           }
 
           const getNewSql = `
-          SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId, ct.cityName
+          SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId,e.status, ct.cityName
           FROM event e
           INNER JOIN city ct ON e.cityCode = ct.cityId
           LEFT JOIN (
@@ -247,6 +248,22 @@ router.get("/dashboard", ensureAuthenticated, (req, res) => {
   res.render("user/dashboard", { user });
 });
 
+router.get("/event", (req, res) => {
+  const getCategorySql =
+    "SELECT categoryID, name, description FROM category ORDER BY categoryID ASC";
+
+  mysql.query(getCategorySql, (categoryErr, categoriesResult) => {
+    if (categoryErr) {
+      console.error(categoryErr);
+      req.flash("error", "Server error (Categories)");
+      return res.redirect("/user");
+    }
+
+    const categories = categoriesResult;
+    res.render("user/event", { categories });
+  });
+});
+
 router.get("/logout", (req, res) => {
   //res.render("user/logout");
   req.session.destroy((err) => {
@@ -259,7 +276,7 @@ router.get("/logout", (req, res) => {
 
 router.get("/category/:id", (req, res) => {
   const sql = `SELECT eventId,eventName,price,orgId,TotalTickets,RemainingTickets,eventDate,
-    eventTime,Description,categoryId,cityCode FROM event WHERE categoryId = ?`;
+    eventTime,Description,categoryId,status,cityCode FROM event WHERE categoryId = ?`;
 
   const id = req.params.id;
   mysql.query(sql, [id], (err, results) => {
@@ -377,79 +394,6 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
     );
   });
 });
-
-// router.post("/reserve", ensureAuthenticated, (req, res) => {
-//   const eventId = req.body.eventId;
-//   const quantity = req.body.quantity;
-//   const user = req.session.user;
-//   const price = req.body.price;
-//   const newReservation = new Reservation(eventId, user.id, quantity, price);
-
-//   // Start a transaction
-//   mysql.beginTransaction((err) => {
-//     if (err) {
-//       console.error(err);
-//       return res
-//         .status(500)
-//         .send({ success: false, message: "Error starting transaction" });
-//     }
-
-//     const sql =
-//       "INSERT INTO reservation(userId, eventId, ticket_quantity, total_amount) VALUES (?, ?, ?, ?)";
-//     mysql.query(
-//       sql,
-//       [
-//         newReservation.uid,
-//         newReservation.eventId,
-//         newReservation.quantity,
-//         newReservation.amount,
-//       ],
-//       (err, results) => {
-//         if (err) {
-//           // Roll back the transaction on error
-//           mysql.rollback(() => {
-//             if (err.sqlState === "45000") {
-//               req.flash("error", "Not enough tickets are available");
-//               res.status(500).redirect(`/user/reserve/${eventId}`);
-//             } else {
-//               console.error(err);
-//               res
-//                 .status(500)
-//                 .send({ success: false, message: "Error booking event" });
-//             }
-//           });
-//         } else {
-//           const sql1 = "SELECT categoryId FROM event WHERE eventId=?";
-//           mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
-//             if (err1) {
-//               console.error(err1);
-//               res
-//                 .status(500)
-//                 .send({ success: false, message: "Error refreshing" });
-//             } else if (results1.length > 0) {
-//               const cat = results1[0].categoryId;
-
-//               // Commit the transaction if everything is successful
-//               mysql.commit((commitErr) => {
-//                 if (commitErr) {
-//                   // Roll back the transaction on commit error
-//                   console.error(commitErr);
-//                   return res.status(500).send({
-//                     success: false,
-//                     message: "Error committing transaction",
-//                   });
-//                 }
-
-//                 req.flash("success", "Your reservation is successful");
-//                 res.redirect(`/user/category/${cat}`);
-//               });
-//             }
-//           });
-//         }
-//       }
-//     );
-//   });
-// });
 
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.user;

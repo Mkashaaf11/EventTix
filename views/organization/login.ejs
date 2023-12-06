@@ -1,45 +1,91 @@
-<style>
-  .abc {
-    background-color: rgb(116, 196, 196);
-    color: white;
-  }
-</style>
+<body style="background-color: #f4f4f4">
+  <style>
+    /* Custom Styles */
 
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6 shadow p-3 mb-5 abc rounded">
-      <h1 class="text-center">Seller Login</h1>
+    .abc {
+      background-color: #3498db;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 30%; /* Adjust the width as needed */
+      margin: auto;
+      margin-bottom: 50px;
+      padding: 20px;
+      border-radius: 10px;
+      transition: background-color 0.3s; /* Smooth transition effect */
+    }
 
-      <!-- Error message display -->
-      <% if (messages.error) { %>
-      <div class="alert alert-danger" role="alert"><%= messages.error %></div>
-      <% } %>
+    .abc:hover {
+      background-color: #214288;
+    }
 
-      <form action="/org/login" method="post">
-        <div class="mb-3">
-          <label for="username" class="form-label">Username:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="username"
-            name="username"
-            required
-          />
-        </div>
+    .login-heading {
+      text-align: center;
+      font-size: 24px;
+    }
 
-        <div class="mb-3">
-          <label for="password" class="form-label">Password:</label>
-          <input
-            type="password"
-            class="form-control"
-            id="password"
-            name="password"
-            required
-          />
-        </div>
+    .form-label {
+      color: white;
+    }
 
-        <button type="submit" class="btn btn-success">Login</button>
-      </form>
+    .form-control {
+      border-radius: 5px;
+    }
+
+    .btn-login {
+      background-color: #28a745;
+      color: white;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .btn-login:hover {
+      background-color: #218838;
+    }
+
+    .alert-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6 shadow p-3 mb-5 abc">
+        <h1 class="login-heading">Login Page</h1>
+
+        <!-- Error message display -->
+        <% if (messages.error) { %>
+        <div class="alert alert-danger" role="alert"><%= messages.error %></div>
+        <% } %>
+
+        <h2 class="login-heading">Organization Login</h2>
+        <form action="/org/login" method="POST">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-login">Login</button>
+        </form>
+      </div>
     </div>
   </div>
-</div>
+</body>

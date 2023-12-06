@@ -21,11 +21,13 @@
     "express-flash": "^0.0.2",
     "express-mysql-session": "^3.0.0",
     "express-session": "^1.17.3",
+    "html-pdf": "^3.0.1",
     "method-override": "^3.0.0",
     "mysql": "^2.18.1",
     "mysql2": "^3.6.1",
+    "puppeteer": "^21.6.0",
     "validator": "^13.11.0"
-},
+  },
   "devDependencies": {
     "nodemon": "^3.0.1"
   }

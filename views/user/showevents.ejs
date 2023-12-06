@@ -64,28 +64,25 @@
   <body>
     <div class="main-container">
       <% if (messages.success) { %>
-        <div class="success-message"><%= messages.success %></div>
-      <% } %>
-
-      <% if (events != null && events.length > 0) { %>
-        <ol>
-          <% events.forEach(event => { %>
-            <% if (event.status !== "Closed" && event.status !== "cancel") { %>
-              <li class="list-item">
-                <span><%= event.eventName %></span><br />
-                <span>Price: <%= event.price %></span><br />
-                <span>Event Date: <%= event.eventDate %></span><br />
-                <span>Event Time: <%= event.eventTime %></span><br />
-                <span>Description: <%= event.Description %></span><br />
-                <form action="/user/reserve/<%=event.eventId%>" ">
-                  <input type="submit" value="Book Now">
-                </form>
-              </li>
-            <% } %>
-          <% }) %>
-        </ol>
+      <div class="success-message"><%= messages.success %></div>
+      <% } %> <% if (events != null && events.length > 0) { %>
+      <ol>
+        <% events.forEach(event => { %> <% if (event.status !== "Closed" &&
+        event.status !== "cancelled") { %>
+        <li class="list-item">
+          <span><%= event.eventName %></span><br />
+          <span>Price: <%= event.price %></span><br />
+          <span>Event Date: <%= event.eventDate %></span><br />
+          <span>Event Time: <%= event.eventTime %></span><br />
+          <span>Description: <%= event.Description %></span><br />
+          <form action="/user/reserve/<%= event.eventId %>" method="post">
+            <input type="submit" value="Book Now" />
+          </form>
+        </li>
+        <% } %> <% }) %>
+      </ol>
       <% } else { %>
-        <div>No events available for this category</div>
+      <div>No events available for this category</div>
       <% } %>
     </div>
   </body>
