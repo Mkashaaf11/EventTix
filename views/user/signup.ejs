@@ -1,68 +1,113 @@
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8 shadow p-3 mb-5 bg-dark text-light rounded">
-      <h1 class="text-center">Sign Up Page</h1>
-      <br />
+<body style="background-color: #f4f4f4">
+  <style>
+    /* Custom Styles */
+    .signup-container {
+      background-color: #3498db; /* Matching the color theme */
+      color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 30%;
+      margin: auto;
+      margin-bottom: 50px;
+      padding: 20px;
+      border-radius: 10px;
+    }
 
-      <form action="/user/signup" method="post">
-        <div class="mb-3">
-          <label for="name" class="form-label">Name:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="name"
-            name="username"
-            required
-          />
-        </div>
+    .signup-heading {
+      text-align: center;
+      font-size: 24px;
+    }
 
-        <div class="mb-3">
-          <label for="email" class="form-label">Email:</label>
-          <input
-            type="email"
-            class="form-control"
-            id="email"
-            name="email"
-            required
-          />
-        </div>
+    .form-label {
+      color: white;
+    }
 
-        <div class="mb-3">
-          <label for="password" class="form-label">Password:</label>
-          <input
-            type="password"
-            class="form-control"
-            id="password"
-            name="password"
-            required
-          />
-        </div>
+    .form-control {
+      border-radius: 5px;
+    }
 
-        <!-- Add more fields for other required information -->
+    .form-select {
+      border-radius: 5px;
+    }
 
-        <div class="mb-3">
-          <label for="age" class="form-label">Age:</label>
-          <input
-            type="number"
-            class="form-control"
-            id="age"
-            name="age"
-            required
-            min="12"
-          />
-        </div>
+    .btn-signup {
+      background-color: #28a745;
+      color: white;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+    }
 
-        <div class="mb-3">
-          <label for="city" class="form-label">City:</label>
-          <select class="form-select" id="city" name="city" required>
-            <% cities.forEach(city => { %>
-            <option value="<%= city.cityId %>"><%= city.cityName %></option>
-            <% }); %>
-          </select>
-        </div>
+    .btn-signup:hover {
+      background-color: #218838;
+    }
+  </style>
 
-        <button type="submit" class="btn btn-success">Sign Up</button>
-      </form>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 shadow p-3 mb-5 signup-container">
+        <h1 class="signup-heading">Sign Up Page</h1>
+        <br />
+
+        <form action="/user/signup" method="post">
+          <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="username"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+
+          <!-- Add more fields for other required information -->
+
+          <div class="mb-3">
+            <label for="age" class="form-label">Age:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="age"
+              name="age"
+              required
+              min="12"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="city" class="form-label">City:</label>
+            <select class="form-select" id="city" name="city" required>
+              <% cities.forEach(city => { %>
+              <option value="<%= city.cityId %>"><%= city.cityName %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-signup">Sign Up</button>
+        </form>
+      </div>
     </div>
   </div>
-</div>
+</body>

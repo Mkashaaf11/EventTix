@@ -31,7 +31,7 @@ router.get("/", ensureAuthenticated, (req, res) => {
       }
 
       const getRecommendationsSql = `
-      SELECT e.eventName, e.price, e.eventDate, e.eventTime, ct.cityName
+      SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId, ct.cityName
       FROM event e
       INNER JOIN city ct ON e.cityCode = ct.cityId
       INNER JOIN (
@@ -58,7 +58,7 @@ router.get("/", ensureAuthenticated, (req, res) => {
           }
 
           const getNewSql = `
-          SELECT e.eventName, e.price, e.eventDate, e.eventTime, ct.cityName
+          SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId, ct.cityName
           FROM event e
           INNER JOIN city ct ON e.cityCode = ct.cityId
           LEFT JOIN (
@@ -71,7 +71,7 @@ router.get("/", ensureAuthenticated, (req, res) => {
               ORDER BY COUNT(*) DESC
               LIMIT 5
           ) AS subquery ON e.categoryID = subquery.categoryID
-          WHERE subquery.categoryID IS NULL;
+          WHERE subquery.categoryID IS NULL and e.status in ('active','soldout');
           
           `;
 
@@ -303,7 +303,6 @@ router.get("/reserve/:id", ensureAuthenticated, (req, res) => {
     }
   });
 });
-
 router.post("/reserve", ensureAuthenticated, (req, res) => {
   const eventId = req.body.eventId;
   const quantity = req.body.quantity;
@@ -312,9 +311,9 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
   const newReservation = new Reservation(eventId, user.id, quantity, price);
 
   // Start a transaction
-  mysql.beginTransaction((err) => {
-    if (err) {
-      console.error(err);
+  mysql.query("START TRANSACTION", (startErr) => {
+    if (startErr) {
+      console.error(startErr);
       return res
         .status(500)
         .send({ success: false, message: "Error starting transaction" });
@@ -333,7 +332,7 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
       (err, results) => {
         if (err) {
           // Roll back the transaction on error
-          mysql.rollback(() => {
+          mysql.query("ROLLBACK", () => {
             if (err.sqlState === "45000") {
               req.flash("error", "Not enough tickets are available");
               res.status(500).redirect(`/user/reserve/${eventId}`);
@@ -349,16 +348,18 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
           mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
             if (err1) {
               console.error(err1);
-              res
-                .status(500)
-                .send({ success: false, message: "Error refreshing" });
+              // Roll back the transaction on error
+              mysql.query("ROLLBACK", () => {
+                res
+                  .status(500)
+                  .send({ success: false, message: "Error refreshing" });
+              });
             } else if (results1.length > 0) {
               const cat = results1[0].categoryId;
 
               // Commit the transaction if everything is successful
-              mysql.commit((commitErr) => {
+              mysql.query("COMMIT", (commitErr) => {
                 if (commitErr) {
-                  // Roll back the transaction on commit error
                   console.error(commitErr);
                   return res.status(500).send({
                     success: false,
@@ -376,6 +377,79 @@ router.post("/reserve", ensureAuthenticated, (req, res) => {
     );
   });
 });
+
+// router.post("/reserve", ensureAuthenticated, (req, res) => {
+//   const eventId = req.body.eventId;
+//   const quantity = req.body.quantity;
+//   const user = req.session.user;
+//   const price = req.body.price;
+//   const newReservation = new Reservation(eventId, user.id, quantity, price);
+
+//   // Start a transaction
+//   mysql.beginTransaction((err) => {
+//     if (err) {
+//       console.error(err);
+//       return res
+//         .status(500)
+//         .send({ success: false, message: "Error starting transaction" });
+//     }
+
+//     const sql =
+//       "INSERT INTO reservation(userId, eventId, ticket_quantity, total_amount) VALUES (?, ?, ?, ?)";
+//     mysql.query(
+//       sql,
+//       [
+//         newReservation.uid,
+//         newReservation.eventId,
+//         newReservation.quantity,
+//         newReservation.amount,
+//       ],
+//       (err, results) => {
+//         if (err) {
+//           // Roll back the transaction on error
+//           mysql.rollback(() => {
+//             if (err.sqlState === "45000") {
+//               req.flash("error", "Not enough tickets are available");
+//               res.status(500).redirect(`/user/reserve/${eventId}`);
+//             } else {
+//               console.error(err);
+//               res
+//                 .status(500)
+//                 .send({ success: false, message: "Error booking event" });
+//             }
+//           });
+//         } else {
+//           const sql1 = "SELECT categoryId FROM event WHERE eventId=?";
+//           mysql.query(sql1, [newReservation.eventId], (err1, results1) => {
+//             if (err1) {
+//               console.error(err1);
+//               res
+//                 .status(500)
+//                 .send({ success: false, message: "Error refreshing" });
+//             } else if (results1.length > 0) {
+//               const cat = results1[0].categoryId;
+
+//               // Commit the transaction if everything is successful
+//               mysql.commit((commitErr) => {
+//                 if (commitErr) {
+//                   // Roll back the transaction on commit error
+//                   console.error(commitErr);
+//                   return res.status(500).send({
+//                     success: false,
+//                     message: "Error committing transaction",
+//                   });
+//                 }
+
+//                 req.flash("success", "Your reservation is successful");
+//                 res.redirect(`/user/category/${cat}`);
+//               });
+//             }
+//           });
+//         }
+//       }
+//     );
+//   });
+// });
 
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.user;

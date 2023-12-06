@@ -1,59 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <div>
-        <table class="table">
-            <tr>
-                <th>Event Name</th>
-                <th>Organiztion Name</th>
-                <th>Category</th>
-                <th>City</th>
-                <th>Tickets</th>
-                <th>Total amount</th>
-                <th>Reservation Time </th>
-            </tr>
-            <% 
-            if(reserve!=null)
-            {
-                let total = 0;
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Arial", sans-serif;
+    background-color: #f4f4f4;
+  }
 
-                reserve.forEach(item => {
-            %>
-            <tr class="order-item"> 
-                <td><%= item.eventName%></td>
-                <td><%= item.org%></td>
-                <td><%= item.name %></td>
-                <td><%= item.cityName %></td>
-                <td><%= item.ticket_quantity%></td>
-                <td><%= item.total_amount %></td>
-                <td><%=item.reservationTime%></td>
-            </tr>
-           
-            
-               
-                
-            <%
-            });
-             }
-            else
-            {
-            %>
+  .reserve {
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #f4f4f4;
+    margin: 0 auto;
+    max-width: 1200px; /* Adjust the maximum width as needed */
+  }
 
-            <tr>
-                <td colspan="5" align="center">No Reservation yet</td>
-            </tr>
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
 
-            <%
-            }
-            %>
-       
-    </table>
-    
-    </div>
-</body>
-</html>
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #3498db;
+    color: #fff;
+  }
+
+  .order-item {
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .order-item:hover {
+    background-color: #f2f2f2;
+  }
+
+  .no-reservation {
+    text-align: center;
+    padding: 20px;
+    font-weight: bold;
+    color: #555;
+  }
+</style>
+
+<div class="reserve">
+  <table class="table">
+    <tr>
+      <th>Event Name</th>
+      <th>Organization Name</th>
+      <th>Category</th>
+      <th>City</th>
+      <th>Tickets</th>
+      <th>Total Amount</th>
+      <th>Reservation Time</th>
+    </tr>
+    <% if(reserve!=null) { let total = 0; reserve.forEach(item => { %>
+    <tr class="order-item">
+      <td><%= item.eventName %></td>
+      <td><%= item.org %></td>
+      <td><%= item.name %></td>
+      <td><%= item.cityName %></td>
+      <td><%= item.ticket_quantity %></td>
+      <td><%= item.total_amount %></td>
+      <td><%= item.reservationTime %></td>
+    </tr>
+    <% }); } else { %>
+    <tr>
+      <td colspan="7" class="no-reservation">No Reservations Yet</td>
+    </tr>
+    <% } %>
+  </table>
+</div>

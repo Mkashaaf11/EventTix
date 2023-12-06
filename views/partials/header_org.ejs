@@ -1,6 +1,30 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+<style>
+  /* Custom Styles */
+  .navbar-custom {
+    background-color: rgb(116, 207, 207);
+    color: white; /* Choose a suitable font color, for example, white */
+  }
+
+  .navbar-custom .navbar-brand {
+    margin-left: 10px; /* Adjust the left margin for the navbar brand */
+  }
+
+  .navbar-custom .navbar-nav {
+    margin-left: auto; /* Push navbar links to the right */
+  }
+
+  .navbar-custom .navbar-nav .nav-link {
+    padding: 0.5rem 1rem; /* Adjust padding for navbar links */
+  }
+
+  .navbar-custom .navbar-toggler-icon {
+    background-color: #fff; /* Adjust the color of the toggler icon if needed */
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-custom">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">EventTix</a>
+    <a class="navbar-brand" href="/">EventTix</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -15,7 +39,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Features</a>

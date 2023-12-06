@@ -6,6 +6,7 @@
     Price: <%= events[i].price %><br />
     Category: <%= events[i].categoryId %> Status: <%= events[i].status %>
   </li>
+  <%if(events[i].status!="Closed"&&events[i].status!="cancel"){%>
   <a href="/org/events/update/<%= events[i].eventId %>">Update</a>
   <form
     method="POST"
@@ -14,5 +15,5 @@
     <button type="submit">Cancel</button>
   </form>
 
-  <% } %>
+  <%}} %>
 </ul>

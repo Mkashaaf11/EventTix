@@ -4,30 +4,88 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+
+    <style>
+      .main-container {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .main-container div {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 600px;
+      }
+
+      .main-container .success-message {
+        color: #2ecc71;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+
+      .main-container .list-item {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin: 10px 0;
+        padding: 15px;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .main-container .list-item:hover {
+        transform: scale(1.02);
+      }
+
+      .main-container form {
+        margin-top: 10px;
+      }
+
+      .main-container input[type="submit"] {
+        background-color: #3498db;
+        color: #fff;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      .main-container input[type="submit"]:hover {
+        background-color: #2980b9;
+      }
+    </style>
   </head>
   <body>
-     <div>
+    <div class="main-container">
       <% if (messages.success) { %>
-        <div><%= messages.success %></div>
-      <%}%> 
+        <div class="success-message"><%= messages.success %></div>
+      <% } %>
 
-      <% if(events != null && events.length > 0) { %>
-      <ol>
-        <% events.forEach(event => { %>
-        <li class="list-item">
-          <span><%= event.eventName %></span><br />
-          <span>Price: <%= event.price %></span><br />
-          <span>Event Date: <%= event.eventDate %></span><br />
-          <span>Event Time: <%= event.eventTime %></span><br />
-          <span>Description: <%= event.Description %></span><br />
-          <form action="/user/reserve/<%=event.eventId%>" ">
-            <input type="submit" value="Book Now">
-          </form> 
-        </li>
-        <% }) %>
-      </ol>
+      <% if (events != null && events.length > 0) { %>
+        <ol>
+          <% events.forEach(event => { %>
+            <% if (event.status !== "Closed" && event.status !== "cancel") { %>
+              <li class="list-item">
+                <span><%= event.eventName %></span><br />
+                <span>Price: <%= event.price %></span><br />
+                <span>Event Date: <%= event.eventDate %></span><br />
+                <span>Event Time: <%= event.eventTime %></span><br />
+                <span>Description: <%= event.Description %></span><br />
+                <form action="/user/reserve/<%=event.eventId%>" ">
+                  <input type="submit" value="Book Now">
+                </form>
+              </li>
+            <% } %>
+          <% }) %>
+        </ol>
       <% } else { %>
-      <div>No events available for this category</div>
+        <div>No events available for this category</div>
       <% } %>
     </div>
   </body>

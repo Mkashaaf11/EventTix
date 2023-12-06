@@ -1,65 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
-    <div>
-            <% 
-            if(info!=null)
-            {
-            %>
-          
-                <div>Event : <%= info.eventName%></div>
-                <div>Organized By : <%= info.name%></div>
-                <div>City : <%= info.cityName%></div>
-                <div>Date : <%= info.eventDate%></div>
-                <div>Start at : <%= info.eventTime%></div>
-                <div>Discription : <%= info.description%></div>
-                <div>Ticket Price : <span id="price"><%= info.price %></span></div>
-                <form action="/user/reserve" method="POST">
-                <div><span>Tickets Quantity : </span>
-                    <button type="button" id="increase">+</button><span >
-                    <input name="quantity" type="text" id="quantity" value="1" readonly></span>
-                    <button type="button" id="decrease">-</button>
-                </div>
-                <div><b>Total Amount:</b><span id="total"><%= info.price %></span></div>
-               <input name="eventId" type="hidden" value="<%= info.eventId%>">
-               <input name="price" type="hidden" value="<%= info.price%>">    
-               <input type="submit" value="Confirm Booking">
-               </form>
-        
-    
-     <%}%>
-     <% if (messages.error) { %>
-      <div><%= messages.error %></div>
-      <%}%>
-    </div>
-    
-    <script>
-    const quantityElement = document.getElementById('quantity');
-    const increaseButton = document.getElementById('increase');
-    const decreaseButton = document.getElementById('decrease');
-    const total=document.getElementById('total');
-    const priceEle=document.getElementById('price');
-    increaseButton.addEventListener('click', () => {
-      const currentQuantity = parseInt(quantityElement.value);
-      quantityElement.value = currentQuantity + 1;
-      const price=parseInt(priceEle.textContent);
-      total.textContent=(currentQuantity + 1)*price;
-    });
 
-    decreaseButton.addEventListener('click', () => {
-      const currentQuantity = parseInt(quantityElement.value);
-      if (currentQuantity > 1) {
-        quantityElement.value = currentQuantity - 1;
-        const price=parseInt(priceEle.textContent);
-       total.textContent=(currentQuantity - 1)*price;
+    <style>
+      .reservation-body {
+        font-family: "Arial", sans-serif;
+        background-color: #f8f8f8;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
       }
-    });
 
+      .reservation-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 100%; /* Take up the full width */
+        max-width: 400px; /* Limit the maximum width */
+        text-align: left;
+      }
+
+      .reservation-container > div {
+        margin-bottom: 10px;
+      }
+
+      .reservation-container form {
+        margin-top: 20px;
+      }
+
+      .reservation-container input[type="submit"] {
+        background-color: #3498db;
+        color: #fff;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      .reservation-container input[type="submit"]:hover {
+        background-color: #2980b9;
+      }
+
+      .reservation-container button {
+        background-color: #3498db;
+        color: #fff;
+        padding: 8px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      .reservation-container button:hover {
+        background-color: #2980b9;
+      }
+
+      .reservation-container #quantity {
+        width: 30px;
+        text-align: center;
+      }
+
+      .reservation-container #total {
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+    </style>
+  </head>
+  <body class="reservation-body">
+    <div class="reservation-container">
+      <% if (info != null) { %>
+      <div><strong>Event:</strong> <%= info.eventName %></div>
+      <div><strong>Organized By:</strong> <%= info.name %></div>
+      <div><strong>City:</strong> <%= info.cityName %></div>
+      <div><strong>Date:</strong> <%= info.eventDate %></div>
+      <div><strong>Start at:</strong> <%= info.eventTime %></div>
+      <div><strong>Description:</strong> <%= info.description %></div>
+      <div>
+        <strong>Ticket Price:</strong> $<span id="price"
+          ><%= info.price %></span
+        >
+      </div>
+      <form action="/user/reserve" method="POST">
+        <div>
+          <strong>Tickets Quantity:</strong>
+          <button type="button" id="decrease">-</button>
+          <input name="quantity" type="text" id="quantity" value="1" readonly />
+          <button type="button" id="increase">+</button>
+        </div>
+        <div>
+          <strong>Total Amount:</strong> $<span id="total"
+            ><%= info.price %></span
+          >
+        </div>
+        <input name="eventId" type="hidden" value="<%= info.eventId %>" />
+        <input name="price" type="hidden" value="<%= info.price %>" />
+        <input type="submit" value="Confirm Booking" />
+      </form>
+      <% } %> <% if (messages.error) { %>
+      <div style="color: #e74c3c"><%= messages.error %></div>
+      <% } %>
+    </div>
+
+    <script>
+      const quantityElement = document.getElementById("quantity");
+      const increaseButton = document.getElementById("increase");
+      const decreaseButton = document.getElementById("decrease");
+      const total = document.getElementById("total");
+      const priceEle = document.getElementById("price");
+
+      increaseButton.addEventListener("click", () => {
+        const currentQuantity = parseInt(quantityElement.value);
+        quantityElement.value = currentQuantity + 1;
+        const price = parseInt(priceEle.textContent);
+        total.textContent = (currentQuantity + 1) * price;
+      });
+
+      decreaseButton.addEventListener("click", () => {
+        const currentQuantity = parseInt(quantityElement.value);
+        if (currentQuantity > 1) {
+          quantityElement.value = currentQuantity - 1;
+          const price = parseInt(priceEle.textContent);
+          total.textContent = (currentQuantity - 1) * price;
+        }
+      });
     </script>
-</body>
+  </body>
 </html>

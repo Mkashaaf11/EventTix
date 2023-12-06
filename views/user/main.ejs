@@ -3,57 +3,219 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Your Events Page</title>
+
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .event-container {
+        background-color: #fff;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .event-container:hover {
+        transform: scale(1.02);
+      }
+
+      .section-title {
+        color: #3498db; /* Attractive blue color */
+        font-size: 1.5em;
+        margin-bottom: 15px;
+      }
+
+      .event-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .event-item {
+        margin-bottom: 20px;
+      }
+
+      .inline-form {
+        display: inline;
+      }
+
+      .btn-primary {
+        background-color: #3498db;
+        color: #fff;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      .btn-primary:hover {
+        background-color: #2980b9; /* Slightly darker blue on hover */
+      }
+
+      .event-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .event-table th,
+      .event-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      .event-table th {
+        background-color: #3498db;
+        color: #fff;
+      }
+
+      .category-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+
+      .category-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 10px;
+        width: 48%;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .category-card:hover {
+        transform: scale(1.05);
+      }
+
+      .category-content {
+        padding: 15px;
+        text-align: center;
+      }
+
+      .category-name {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .category-description {
+        color: #555;
+      }
+    </style>
   </head>
+
   <body>
-    <div>
-      <h2>New Events For you</h2>
-      <ul>
-        <% if(newToYou && newToYou.length > 0) { %> <% newToYou.forEach(event =>
-        { %>
-        <li>
-          <%= event.eventName%> - <%= event.price %> - <%= event.eventDate %> -
-          <%= event.eventTime %> - <%= event.cityName %>
-          <form action="/user/reserve/<%=event.eventId%>">
-            <input type="submit" value="Book Now" />
-          </form>
-        </li>
-        <% })%> <% } else { %>
-        <li>No New Event For You at the moment</li>
-        <% }%>
-      </ul>
+    <div class="event-container">
+      <h2 class="section-title">Explore Exciting New Events</h2>
+      <% if(newToYou && newToYou.length > 0) { %>
+      <table class="event-table">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Ticket Price</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>City</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% newToYou.forEach(event => { %>
+          <tr class="event-item">
+            <td><%= event.eventName %></td>
+            <td><%= event.price %></td>
+            <td><%= event.eventDate %></td>
+            <td><%= event.eventTime %></td>
+            <td><%= event.cityName %></td>
+            <td>
+              <form
+                action="/user/reserve/<%= event.eventId %>"
+                class="inline-form"
+              >
+                <button type="submit" class="btn btn-primary">Book Now</button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p>No New Event For You at the moment</p>
+      <% } %>
     </div>
 
-    <div>
-      <h2>Recommended Events For you</h2>
-      <ul>
-        <% if(recommendation && recommendation.length > 0) { %> <%
-        recommendation.forEach(event => { %>
-        <li>
-          <%= event.eventName%> - <%= event.price %> - <%= event.eventDate %> -
-          <%= event.eventTime %> - <%= event.cityName %>
-          <form action="/user/reserve/<%=event.eventId%>">
-            <input type="submit" value="Book Now" />
-          </form>
-        </li>
-        <% })%> <% } else { %>
-        <li>
-          Hurry up and book some events so we help you with some recommendation
-        </li>
-        <% }%>
-      </ul>
+    <div class="event-container">
+      <h2 class="section-title">Recommended Events Just For You</h2>
+      <% if(recommendation && recommendation.length > 0) { %>
+      <table class="event-table">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Ticket Price</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>City</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recommendation.forEach(event => { %>
+          <tr class="event-item">
+            <td><%= event.eventName %></td>
+            <td><%= event.price %></td>
+            <td><%= event.eventDate %></td>
+            <td><%= event.eventTime %></td>
+            <td><%= event.cityName %></td>
+            <td>
+              <form
+                action="/user/reserve/<%= event.eventId %>"
+                class="inline-form"
+              >
+                <input type="submit" value="Book Now" />
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p>
+        Hurry up and book some events so we can help you with recommendations.
+      </p>
+      <% } %>
     </div>
 
-    <div>
-      <% if(categories != null){ %> <% categories.forEach(category => { %>
-      <div>
-        <a href="user/category/<%= category.categoryID %>">
-          <div><%= category.name %></div>
-          <div><%= category.description %></div>
+    <div class="event-container">
+      <% if(categories != null) { %>
+      <h2 class="section-title">Discover Exciting Categories</h2>
+      <div class="category-container">
+        <% categories.forEach(category => { %>
+        <a
+          href="user/category/<%= category.categoryID %>"
+          class="category-card"
+        >
+          <div class="category-content">
+            <div class="category-name"><%= category.name %></div>
+            <div class="category-description"><%= category.description %></div>
+          </div>
         </a>
+        <% }) %>
       </div>
-      <% }) %> <% } else { %>
-      <div>Cant Show categories rightnow</div>
+      <% } else { %>
+      <div class="category-card">Can't show categories right now</div>
       <% } %>
     </div>
   </body>
