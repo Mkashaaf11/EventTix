@@ -1,27 +1,68 @@
-<h1>Sign UP Page</h1>
-<br />
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 shadow p-3 mb-5 bg-dark text-light rounded">
+      <h1 class="text-center">Sign Up Page</h1>
+      <br />
 
-<form action="/user/signup" method="post">
-  <label for="name">Name:</label>
-  <input type="text" id="name" name="username" required />
+      <form action="/user/signup" method="post">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="username"
+            required
+          />
+        </div>
 
-  <label for="email">Email:</label>
-  <input type="email" id="email" name="email" required />
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+          />
+        </div>
 
-  <label for="password">Password:</label>
-  <input type="password" id="password" name="password" required />
+        <div class="mb-3">
+          <label for="password" class="form-label">Password:</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+        </div>
 
-  <!-- Add more fields for other required information -->
+        <!-- Add more fields for other required information -->
 
-  <label for="age">Age:</label>
-  <input type="number" id="age" name="age" required min="12" />
+        <div class="mb-3">
+          <label for="age" class="form-label">Age:</label>
+          <input
+            type="number"
+            class="form-control"
+            id="age"
+            name="age"
+            required
+            min="12"
+          />
+        </div>
 
-  <label for="city">City:</label>
-  <select id="city" name="city" required>
-    <% cities.forEach(city => { %>
-    <option value="<%= city.cityId %>"><%= city.cityName %></option>
-    <% }); %>
-  </select>
+        <div class="mb-3">
+          <label for="city" class="form-label">City:</label>
+          <select class="form-select" id="city" name="city" required>
+            <% cities.forEach(city => { %>
+            <option value="<%= city.cityId %>"><%= city.cityName %></option>
+            <% }); %>
+          </select>
+        </div>
 
-  <button type="submit">Sign Up</button>
-</form>
+        <button type="submit" class="btn btn-success">Sign Up</button>
+      </form>
+    </div>
+  </div>
+</div>

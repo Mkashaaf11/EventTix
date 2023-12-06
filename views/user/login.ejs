@@ -1,19 +1,41 @@
-<h1>Login Page</h1>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 shadow p-3 mb-5 bg-dark text-light rounded">
+      <h1 class="text-center">Login Page</h1>
 
-<!-- Inside your login.ejs or a similar view -->
-<% if (messages.error) { %>
-<div style="color: red; margin-bottom: 10px"><%= messages.error %></div>
-<% } %>
+      <!-- Error message display -->
+      <% if (messages.error) { %>
+      <div class="alert alert-danger" role="alert"><%= messages.error %></div>
+      <% } %>
 
-<h2>User Login</h2>
-<form action="/user/login" method="POST">
-  <label for="username">Username:</label>
-  <input type="text" id="username" name="username" required />
-  <br />
+      <h2 class="text-center">User Login</h2>
+      <form action="/user/login" method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            required
+          />
+        </div>
 
-  <label for="password">Password:</label>
-  <input type="password" id="password" name="password" required />
-  <br />
+        <div class="mb-3">
+          <label for="password" class="form-label">Password:</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+        </div>
 
-  <button type="submit" style="margin-top: 10px">Login</button>
-</form>
+        <button type="submit" class="btn btn-success" style="margin-top: 10px">
+          Login
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

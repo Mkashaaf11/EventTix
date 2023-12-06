@@ -1,19 +1,65 @@
-<h1>Seller signup</h1>
-<br />
+<style>
+  .abc {
+    background-color: rgb(116, 196, 196);
+    color: white;
+  }
+</style>
 
-<form action="/org/signup" method="post">
-  <label for="name">Name:</label>
-  <input type="text" id="name" name="name" required />
-  <label for="username">Username:</label>
-  <input type="text" id="username" name="username" required />
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 shadow p-3 mb-5 abc rounded">
+      <h1 class="text-center">Seller Signup</h1>
+      <br />
 
-  <label for="email">Email:</label>
-  <input type="email" id="email" name="email" required />
+      <form action="/org/signup" method="post">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="name"
+            required
+          />
+        </div>
 
-  <label for="password">Password:</label>
-  <input type="password" id="password" name="password" required />
+        <div class="mb-3">
+          <label for="username" class="form-label">Username:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            required
+          />
+        </div>
 
-  <!-- Add more fields for other required information -->
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+          />
+        </div>
 
-  <button type="submit">Sign Up</button>
-</form>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password:</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+        </div>
+
+        <!-- Add more fields for other required information -->
+
+        <button type="submit" class="btn btn-success">Sign Up</button>
+      </form>
+    </div>
+  </div>
+</div>
