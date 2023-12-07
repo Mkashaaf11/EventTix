@@ -1,56 +1,110 @@
 <style>
-  /* Custom Styles */
-  .navbar-custom {
-    background-color: rgb(116, 207, 207);
-    color: white; /* Choose a suitable font color, for example, white */
-  }
-
-  .navbar-custom .navbar-brand {
-    margin-left: 10px; /* Adjust the left margin for the navbar brand */
-  }
-
-  .navbar-custom .navbar-nav {
-    margin-left: auto; /* Push navbar links to the right */
-  }
-
-  .navbar-custom .navbar-nav .nav-link {
-    padding: 0.5rem 1rem; /* Adjust padding for navbar links */
-  }
-
-  .navbar-custom .navbar-toggler-icon {
-    background-color: #fff; /* Adjust the color of the toggler icon if needed */
-  }
-</style>
-
-<nav class="navbar navbar-expand-lg navbar-custom">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">EventTix</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Features</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Pricing</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-        </li>
-      </ul>
+    /* Custom Styles */
+    .navbar-custom {
+      background-color: rgb(116, 207, 207); /* Matching the color theme */
+      color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adding a subtle box shadow */
+    }
+  
+    .navbar-custom .navbar-brand {
+      margin-left: 10px;
+      font-size: 1.5rem; /* Increase font size for the brand */
+    }
+    .navbar-toggler-icon{
+        background-color: rgb(116, 207, 207)!important;
+    }
+  
+    .navbar-custom .navbar-nav {
+      margin-left: auto;
+    }
+  
+    .navbar-custom .navbar-nav .nav-link {
+      padding: 0.5rem 1rem;
+      color: white; /* Font color for navbar links */
+      transition: color 0.3s ease-in-out; /* Adding a smooth color transition effect */
+    }
+  
+    .navbar-custom .navbar-nav .nav-link:hover {
+      color: #ecf0f1; /* Change color on hover */
+    }
+  
+    .navbar-custom .navbar-toggler-icon {
+      background-color: #fff;
+    }
+  
+    .navbar-custom .navbar-toggler:focus {
+      outline: none; /* Remove focus outline on toggler */
+    }
+  
+    .navbar-custom .features-dropdown {
+      position: relative;
+    }
+  
+    .navbar-custom .features-dropdown .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 1000;
+      display: none;
+      float: left;
+      min-width: 10rem;
+      padding: 0.5rem 0;
+      margin: 0.125rem 0 0;
+      font-size: 1rem;
+      color: #212529;
+      text-align: left;
+      list-style: none;
+      background-color: #fff;
+      background-clip: padding-box;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0.25rem;
+      transition: display 0.3s ease-in-out;
+      overflow-x: auto; /* Enable horizontal scroll */
+    }
+  
+    .navbar-custom .features-dropdown .dropdown-item {
+      padding: 0.25rem 1.5rem;
+      white-space: nowrap; /* Prevent line breaks in dropdown items */
+    }
+  
+    .navbar-custom .features-dropdown:hover .dropdown-menu {
+      display: block;
+    }
+  </style>
+  
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">EventTix</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/org/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/org/myreservations">Reservations</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/org/events">My Events</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/org/events/add">Add New</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/org/logout">Logout</a>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
+  

@@ -9,19 +9,20 @@ const { isEmail, isLength } = require("validator");
 router.get("/dashboard", ensureAuthenticated, (req, res) => {
   const user = req.session.organization;
   const id = user.orgID;
-  const sql1 = `select * from event 
+  const sql1 = `select eventName,TotalTickets,RemainingTickets,DATE_FORMAT(eventDate, '%Y-%m-%d %h:%i %p') AS "eventDate" from event
                 where orgId=? and status IN ('Active','Sold Out')`;
-  const sql2 = `select e.eventId,e.eventName,u.age,count(*) as "count" from event e 
+  const sql2 = `select u.age,count(*) as "count" from event e 
                inner join reservation r on e.eventId=r.eventId
                inner join users u on u.id=r.userId
                where e.orgId=?
-               group by e.eventId,u.age`;
-  const sql3 = `select e.eventId,e.eventName,c.cityName,count(*) as "count" from event e 
+               group by u.age LIMIT 5`;
+  const sql3 = `select c.cityName,count(*) as "count" from event e 
                inner join reservation r on e.eventId=r.eventId
                inner join users u on u.id=r.userId
                inner join city c on c.cityId=u.cityId
                where e.orgId=?
-               group by e.eventId,c.cityName`;
+               group by c.cityName
+               order by count(*) desc LIMIT 5`;
 
   const sql4 = `select c.name,count(*) as "count" from reservation r
                   inner join  event e on e.eventId=r.eventId
@@ -67,8 +68,6 @@ router.get("/dashboard", ensureAuthenticated, (req, res) => {
       });
     }
   });
-
-  res.render("organization/main");
 });
 
 router.get("/signup", (req, res) => {
@@ -507,11 +506,9 @@ router.delete("/events/cancel/:id", ensureAuthenticated, (req, res) => {
 router.get("/myreservations", ensureAuthenticated, (req, res) => {
   const user = req.session.organization;
   const id = user.orgID;
-  console.log(id);
-  const sql = `select r.eventId,e.eventName,count(*),e.TotalTickets,e.RemainingTickets as "count" from reservation r 
-             inner join event e on r.eventId=e.eventId 
-             where e.orgId=?
-             group by r.eventId`;
+  const sql = `select eventId,eventName,TotalTickets-RemainingTickets as "count",TotalTickets,RemainingTickets 
+               from event  
+               where orgId=?`;
 
   mysql.query(sql, [id], (err, results) => {
     const events = results;

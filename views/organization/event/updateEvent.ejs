@@ -1,95 +1,132 @@
-<h1>update item</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Item</title>
+    <style>
+       
+        form {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
 
-<!-- updateItem.ejs -->
-<form
-  action="/org/events/update/<%= event.eventId %>?_method=PUT"
-  method="POST" onsubmit="return validateTickets()"
->
-  <label for="eventName">Event Name:</label>
-  <input
-    type="text"
-    id="eventName"
-    name="eventName"
-    value="<%= event.eventName %>"
-  required/>
-  <label for="price">Price:</label>
-  <input type="text" id="price" name="price" value="<%= event.price %>" required/>
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
 
-  <label for="orgid">Organization ID:</label>
-  <input
-    type="text"
-    id="orgid"
-    name="orgId"
-    value="<%= session.organization.orgID %>"
-    readonly
-  />
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
 
-  <label for="category">Category:</label>
-  <select id="category" name="category" required>
-    <% categories.forEach(category => { %>
-    <option value="<%= category.categoryID %>" <%= event.categoryId === category.categoryID ? 'selected' : '' %> ><%= category.name %></option>
-    <% }); %>
-  </select>
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
 
-  <label for="city">City:</label>
-  <select id="city" name="cityId" required>
-    <% cities.forEach(city => { %>
-    <option value="<%= city.cityId %>" <%= event.cityCode === city.cityId ? 'selected' : '' %>><%= city.cityName %></option>
-    <% }); %>
-  </select>
+        button:hover {
+            background-color: #0056b3;
+        }
 
-  <label for="TotalTickets">Total Tickets:</label>
-  <input type="number" id="TotalTickets" name="TotalTickets" value="<%= event.TotalTickets %>"/>
+        textarea {
+            resize: vertical;
+        }
 
-  <label for="RemainingTickets">Remaining Tickets:</label>
-  <input type="number" id="RemainingTickets" name="RemainingTickets" value="<%= event.RemainingTickets %>" />
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Update Item</h1>
 
-  <label for="eventDate">Event Date:</label>
-  <input type="date" id="eventDate" name="eventDate" value="<%= event.eventDate %>"/>
+    <form action="/org/events/update/<%= event.eventId %>?_method=PUT" method="POST" onsubmit="return validateTickets()">
+        <label for="eventName">Event Name:</label>
+        <input type="text" id="eventName" name="eventName" value="<%= event.eventName %>" required/>
 
-  <label for="endDate">Event Date:</label>
-  <input type="date" id="endDate" name="endDate" value="<%= event.endDate %>"/>
+        <label for="price">Price:</label>
+        <input type="text" id="price" name="price" value="<%= event.price %>" required/>
 
+        <label for="orgid">Organization ID:</label>
+        <input type="hidden" id="orgid" name="orgId" value="<%= session.organization.orgID %>" readonly/>
 
-  <label for="eventTime">Event Time:</label>
-  <input type="time" id="eventTime" name="eventTime" value="<%= event.eventTime %>"/>
+        <label for="category">Category:</label>
+        <select id="category" name="category" required>
+            <% categories.forEach(category => { %>
+                <option value="<%= category.categoryID %>" <%= event.categoryId === category.categoryID ? 'selected' : '' %> ><%= category.name %></option>
+            <% }); %>
+        </select>
 
-  <label for="Description">Description:</label>
-<textarea id="Description" name="Description" required><%= event.Description %></textarea>
+        <label for="city">City:</label>
+        <select id="city" name="cityId" required>
+            <% cities.forEach(city => { %>
+                <option value="<%= city.cityId %>" <%= event.cityCode === city.cityId ? 'selected' : '' %>><%= city.cityName %></option>
+            <% }); %>
+        </select>
 
+        <label for="TotalTickets">Total Tickets:</label>
+        <input type="number" id="TotalTickets" name="TotalTickets" value="<%= event.TotalTickets %>"/>
 
+        <label for="RemainingTickets">Remaining Tickets:</label>
+        <input type="number" id="RemainingTickets" name="RemainingTickets" value="<%= event.RemainingTickets %>" />
 
-  <!-- Add other fields as needed -->
-  <button type="submit">Update</button>
-</form>
+        <label for="eventDate">Event Date:</label>
+        <input type="date" id="eventDate" name="eventDate" value="<%= event.eventDate %>"/>
 
-<script>
-  function validateTickets() {
-    const totalTickets = parseInt(
-      document.getElementById("TotalTickets").value
-    );
-    const remainingTickets = parseInt(
-      document.getElementById("RemainingTickets").value
-    );
+        <label for="endDate">Event Date:</label>
+        <input type="date" id="endDate" name="endDate" value="<%= event.endDate %>"/>
 
-    const eventDate = new Date(document.getElementById("eventDate").value);
-    const endDate = new Date(document.getElementById("endDate").value);
-    if (endDate < eventDate) {
-      alert("Event ending date cant be less than actual date");
-      return false;
-    }
+        <label for="eventTime">Event Time:</label>
+        <input type="time" id="eventTime" name="eventTime" value="<%= event.eventTime %>"/>
 
+        <label for="Description">Description:</label>
+        <textarea id="Description" name="Description" required><%= event.Description %></textarea>
 
-    if (
-      isNaN(totalTickets) ||
-      isNaN(remainingTickets) ||
-      remainingTickets > totalTickets || totalTickets < 0 ||
-      remainingTickets < 0
-    ) {
-      alert("Remaining Tickets should be less than or equal to Total Tickets.");
-      return false;
-    }
+        <button type="submit">Update</button>
+    </form>
 
-    return true;
-  }
-</script>
+    <script>
+        function validateTickets() {
+            const totalTickets = parseInt(document.getElementById("TotalTickets").value);
+            const remainingTickets = parseInt(document.getElementById("RemainingTickets").value);
+
+            const eventDate = new Date(document.getElementById("eventDate").value);
+            const endDate = new Date(document.getElementById("endDate").value);
+            if (endDate < eventDate) {
+                alert("Event ending date can't be less than the actual date");
+                return false;
+            }
+
+            if (isNaN(totalTickets) || isNaN(remainingTickets) || remainingTickets > totalTickets || totalTickets < 0 || remainingTickets < 0) {
+                alert("Remaining Tickets should be less than or equal to Total Tickets.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

@@ -1,19 +1,109 @@
-<h1>Events</h1>
-<ul>
-  <% for (let i = 0; i < events.length; i++) { %>
-  <li>
-    Event Name: <%= events[i].eventName %><br />
-    Price: <%= events[i].price %><br />
-    Category: <%= events[i].categoryId %> Status: <%= events[i].status %>
-  </li>
-  <%if(events[i].status!="Closed"&&events[i].status!="cancel"){%>
-  <a href="/org/events/update/<%= events[i].eventId %>">Update</a>
-  <form
-    method="POST"
-    action="/org/events/cancel/<%= events[i].eventId %>?_method=DELETE"
-  >
-    <button type="submit">Cancel</button>
-  </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
 
-  <%}} %>
-</ul>
+        h1 {
+            color: rgb(116, 207, 207);
+            text-align: center;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .llll {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin: 15px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .llll:hover {
+            transform: scale(1.03);
+        }
+
+        a {
+            text-decoration: none;
+            color: #28a745;
+            margin-right: 10px;
+            transition: color 0.3s ease-in-out;
+        }
+
+        a:hover {
+            color: black;
+        }
+
+        button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+            display: block;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #c82333;
+        }
+        .update-button {
+            background-color: rgb(116, 207, 207);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .update-button:hover {
+            background-color: rgb(108, 208, 208);
+        }
+    </style>
+</head>
+<body>
+    <h1>Events</h1>
+    <ul>
+        <% for (let i = 0; i < events.length; i++) { %>
+            <li class="llll">
+                <strong>Event Name:</strong> <%= events[i].eventName %><br />
+                <strong>Price:</strong> <%= events[i].price %><br />
+                <strong>Category:</strong> <%= events[i].categoryId %><br/>
+                <strong>Status:</strong> <%= events[i].status %><br/><br/>
+                <% if (events[i].status != "Closed" && events[i].status != "cancel") { %>
+                    <a class="update-button" href="/org/events/update/<%= events[i].eventId %>">Update</a>
+                    <form method="POST" action="/org/events/cancel/<%= events[i].eventId %>?_method=DELETE">
+                        <button type="submit">Cancel</button>
+                    </form>
+                <% } %>
+            </li>
+        <% } %>
+    </ul>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

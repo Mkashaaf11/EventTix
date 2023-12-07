@@ -1,4 +1,299 @@
-<h1>Seller Dashboard</h1>
-<form action="/org/myreservations">
-    <input type="submit" value="See Reservations">
-</form>
+<!-- organization/dashboard.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Dashboard</title>
+
+    <style>
+      /* Custom Styles for Cards */
+      .custom-card:hover {
+            transform: scale(1.05);
+        }
+      .custom-card {/* White */
+            animation: fadeInUp 0.5s ease-in-out; /* Apply fadeInUp animation */
+        }
+
+      .chart{
+        background-color: rgba(116, 207, 207, 0.171);
+        
+      }
+      .card-body{
+        background-color: rgba(116, 207, 207, 0.171)!important;
+      }
+      table{
+        background-color: rgba(116, 207, 207, 0.171)!important
+      }
+      /* Keyframes for fadeInUp animation */
+      @keyframes fadeInUp {
+          from {
+              opacity: 0;
+              transform: translateY(20px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+      .card{
+        background-color: rgba(116, 207, 207, 0.171);
+      }
+  </style>
+</head>
+<body>
+  <div id="cityData" style="display: none;">
+    <%= JSON.stringify(city) %>
+  </div>
+  <div id="ageData" style="display: none;">
+    <%= JSON.stringify(age) %> 
+  </div>
+  <div id="eventsData" style="display: none;">
+    <%= JSON.stringify(events) %>
+  </div>
+  <div id="categData" style="display: none;">
+    <%= JSON.stringify(categ) %>
+ </div> 
+
+ <div class="container">
+  <!-- Chart for Events (Line Chart) -->
+  <div class="row custom-card">
+      <div class="col-md-12 cc">
+          <div class="card mb-3">
+              <div class="card-body">
+                  <canvas id="eventsChart" class="chart"></canvas>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Charts for City and Age Data -->
+  <div class="row">
+      <!-- Chart for City Data (Bar Chart) -->
+      <div class="col-md-6  custom-card">
+          <div class="card mb-3">
+              <div class="card-body">
+                  <canvas id="cityChart" class="chart"></canvas>
+              </div>
+          </div>
+      </div>
+
+      <!-- Chart for Age Data (Bar Chart) -->
+      <div class="col-md-6 custom-card">
+          <div class="card mb-3">
+              <div class="card-body">
+                  <canvas id="ageChart" class="chart"></canvas>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Chart for Category Data (Bar Chart) on a Separate Line -->
+  <div class="row custom-card">
+      <div class="col-md-12">
+          <div class="card mb-3">
+              <div class="card-body">
+                  <canvas id="categChart" class="chart"></canvas>
+              </div>
+          </div>
+      </div>
+  </div>
+  <div class="row custom-card">
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="card-body">
+             <h5>Up Coming Events</h5>
+             <table class="table table-borderless" id="tt">
+              <thead>
+                <tr>
+                  <th scope="col">Event Name</th>
+                  <th scope="col">Remainig Tickets</th>
+                  <th scope="col">Event Date</th>
+                  <th scope="col">Total Reservations</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%if(events!=null)
+                {
+                    events.forEach(event =>{    
+                 %>
+                <tr>
+                  <td><%=event.eventName%></td>
+                  <td><%=event.RemainingTickets%></td>
+                  <td><%=event.eventDate%></td>
+                  <td><%=event.TotalTickets-event.RemainingTickets%></td>
+                </tr>
+               <%});}
+               else{%>
+                <tr>
+                  <td colspan="6" align="center">No Reservation yet!</td>
+                </tr>
+
+                <%}%>
+              </tbody>
+            </table>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Access data from the invisible div
+        var eventData = JSON.parse(document.getElementById('eventsData').textContent);
+        var cityData = JSON.parse(document.getElementById('cityData').textContent);
+        var categData = JSON.parse(document.getElementById('categData').textContent);
+        var ageData = JSON.parse(document.getElementById('ageData').textContent);
+        var labelsCity = cityData.map(function(item) {
+            return item.cityName.replace(/"/g, '&quot;'); // if needed
+        });
+        var valuesCity = cityData.map(function(item) {
+            return item.count;
+        }); 
+       
+        var labelsCateg = categData.map(function(item) {
+            return item.name.replace(/"/g, '&quot;'); // if needed
+        });
+        var valuesCateg = categData.map(function(item) {
+            return item.count;
+        }); 
+        var labelsEvent = eventData.map(function(item) {
+            return item.eventName.replace(/"/g, '&quot;'); // if needed
+        });
+        var valuesEvent = eventData.map(function(item) {
+            return (item.TotalTickets-item.RemainingTickets);
+        });
+        function categorizeAges(data) {
+            // Define age intervals
+            var intervals = ['10-20', '20-30', '30-40', '40-50', '50-60'];
+
+            // Initialize counts for each interval
+            var counts = {};
+            intervals.forEach(interval => {
+                counts[interval] = 0;
+            });
+
+            // Categorize ages into intervals
+            data.forEach(item => {
+                var age = item.age;
+                for (var i = 0; i < intervals.length; i++) {
+                    var range = intervals[i].split('-').map(Number);
+                    if (age >= range[0] && age < range[1]) {
+                        counts[intervals[i]] += item.count;
+                        break;
+                    }
+                }
+            });
+
+            // Extract labels and values for the chart
+            var labels = Object.keys(counts);
+            var values = Object.values(counts);
+
+            return { labels, values };
+        }
+        // Function to create a line chart
+        function createLineChart(ctx, labels, data, label) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: '#3498db',
+                        backgroundColor:'#3498db',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to create a bar chart
+        function createBarChart(ctx, labels, data, label) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor:color=>{
+                          let colors=color.index<3?'#3498db':'rgb(116, 207, 207)';
+                          return colors;
+                        },
+                        borderWidth: 1
+
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to create a pie chart
+        function createPieChart(ctx, labels, data, label) {
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
+        // Create charts for each object
+        var ctxEvents = document.getElementById('eventsChart').getContext('2d');
+        createLineChart(ctxEvents, labelsEvent, valuesEvent, 'Events');
+
+        var ctxCity = document.getElementById('cityChart').getContext('2d');
+        createBarChart(ctxCity,labelsCity, valuesCity, 'City');
+
+        var ctxCateg = document.getElementById('categChart').getContext('2d');
+        createBarChart(ctxCateg, labelsCateg, valuesCateg, 'Category');
+        var categorizedAges = categorizeAges(ageData);
+        var ctxAge = document.getElementById('ageChart').getContext('2d');
+        createBarChart(ctxAge, categorizedAges.labels, categorizedAges.values, 'Age');
+    </script>
+
+    <!-- Add Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
