@@ -1,17 +1,70 @@
-<div>
-  <ol>
-    <% if (users!=null) { %> <% users.forEach(user => { %>
-    <li class="list-item">
-      <span>Username:<%= user.username %></span><br />
-      <span>Email: <%= user.email %></span><br />
-      <span>Age: <%= user.age%></span><br />
-      <span>City Name: <%= user.cityName %></span><br />
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Users List</title>
+    <style>
+      body {
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        font-family: "Arial", sans-serif;
+      }
 
-      <form action="/admin/restrictUser/<%=user.id%>">
-        <input type="submit" value="Restrict" />
-      </form>
-    </li>
+      .user-container {
+        margin: 20px;
+      }
 
-    <% }); %> <% } %>
-  </ol>
-</div>
+      .list-item {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .list-item span {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .list-item form {
+        display: inline;
+      }
+
+      .list-item input[type="submit"] {
+        background-color: #e74c3c;
+        color: #fff;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      .list-item input[type="submit"]:hover {
+        background-color: #c0392b;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="user-container">
+      <ol>
+        <% if (users != null) { %> <% users.forEach(user => { %>
+        <li class="list-item">
+          <span>Username: <%= user.username %></span><br />
+          <span>Email: <%= user.email %></span><br />
+          <span>Age: <%= user.age %></span><br />
+          <span>City Name: <%= user.cityName %></span><br />
+
+          <form action="/admin/restrictUser/<%= user.id %>">
+            <input type="submit" value="Restrict" />
+          </form>
+        </li>
+        <% }); %> <% } %>
+      </ol>
+    </div>
+  </body>
+</html>

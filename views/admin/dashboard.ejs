@@ -1,4 +1,52 @@
-<div>
-  <a href="/admin/viewUsers"><button>View Users</button></a>
-  <a href="/admin/viewOrg"><button>View Organization</button></a>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <style>
+      .admin-container {
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        font-family: "Arial", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      .button-container {
+        text-align: center;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      .button-container a button {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        margin: 0 10px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      .button-container a button:hover {
+        background-color: #2980b9;
+      }
+    </style>
+  </head>
+
+  <body class="admin-container">
+    <div class="button-container">
+      <a href="/admin/viewUsers"><button>View Users</button></a>
+      <a href="/admin/viewOrg"><button>View Organization</button></a>
+      <a href="/admin/logout"><button>Logout</button></a>
+    </div>
+  </body>
+</html>

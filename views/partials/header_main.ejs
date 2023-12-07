@@ -2,31 +2,76 @@
   /* Custom Styles */
   .navbar-custom {
     background-color: rgb(30, 30, 131);
-    color: white !important; /* Choose a suitable font color, for example, white */
+    color: white !important;
   }
 
   .navbar-custom .navbar-brand {
-    margin-left: 10px; /* Adjust the left margin for the navbar brand */
+    margin-left: 10px;
+    font-size: 1.8rem; /* Increase font size for the brand */
+    font-weight: bold; /* Make the font bold */
+    letter-spacing: 1px; /* Add letter spacing */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle text shadow */
   }
 
   .navbar-custom .navbar-nav {
-    margin-left: auto; /* Push navbar links to the right */
+    margin-left: auto;
   }
 
   .navbar-custom .navbar-nav .nav-link {
-    padding: 0.5rem 1rem; /* Adjust padding for navbar links */
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease-in-out;
+  }
+
+  .navbar-custom .navbar-nav .nav-link:hover {
+    color: #ecf0f1;
+    transform: scale(1.1);
   }
 
   .navbar-custom .navbar-toggler-icon {
-    background-color: #fff; /* Adjust the color of the toggler icon if needed */
+    background-color: #fff;
   }
 
-  a.nav-link {
+  .navbar-custom a.nav-link,
+  .navbar-custom a.navbar-brand {
     color: white;
   }
 
-  a.navbar-brand {
-    color: white;
+  .navbar-custom .features-dropdown {
+    position: relative;
+  }
+
+  .navbar-custom .features-dropdown .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.25rem;
+    transition: display 0.3s ease-in-out;
+    overflow-x: auto;
+  }
+
+  .navbar-custom .features-dropdown .dropdown-item {
+    padding: 0.25rem 1.5rem;
+    white-space: nowrap;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .navbar-custom .features-dropdown:hover .dropdown-menu {
+    display: block;
   }
 </style>
 
@@ -47,10 +92,24 @@
     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">Home</a>
+          <a class="nav-link" href="/">Home</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Features</a>
+        <li class="nav-item features-dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Features
+          </a>
+          <div class="dropdown-menu">
+            <h3 class="dropdown-item">Book Events</h3>
+            <h3 class="dropdown-item">Track Reservations</h3>
+            <h3 class="dropdown-item">Best Events Hosting</h3>
+          </div>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/user/signup">signup</a>

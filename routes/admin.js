@@ -124,6 +124,14 @@ router.get("/restrictOrg/:id", (req, res) => {
     }
   });
 });
+router.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error(err);
+    }
+    res.redirect("/"); // Redirect to the login page after signing out
+  });
+});
 
 function ensureAuthenticated(req, res, next) {
   if (req.session.admin) {
