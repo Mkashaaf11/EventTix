@@ -34,22 +34,22 @@ router.get("/dashboard", ensureAuthenticated, (req, res) => {
     if (err1) {
       console.error(err1);
       res.status(500).send("Error Querying database");
-    } else if (results1.length > 0) {
+    } else{
       mysql.query(sql2, [id], (err2, results2) => {
         if (err2) {
           console.error(err2);
           res.status(500).send("Error Querying database");
-        } else if (results2.length > 0) {
+        } else{
           mysql.query(sql3, [id], (err3, results3) => {
             if (err3) {
               console.error(err3);
               res.status(500).send("Error Querying database");
-            } else if (results3.length > 0) {
+            } else{
               mysql.query(sql4, (err4, results4) => {
                 if (err4) {
                   console.error(err4);
                   res.status(500).send("Error Querying database");
-                } else if (results4.length > 0) {
+                } else{
                   const events = results1;
                   const age = results2;
                   const city = results3;
