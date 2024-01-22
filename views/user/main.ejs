@@ -199,7 +199,43 @@
       </p>
       <% } %>
     </div>
-
+    <div class="event-container">
+      <h2 class="section-title">Events Happening at <%= cityWise[0].cityName %></h2>
+      <% if(cityWise && cityWise.length > 0) { %>
+      <table class="event-table">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Ticket Price</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cityWise.forEach(event => { %> <% if (event.status !== "Closed" &&
+          event.status !== "cancelled") { %>
+          <tr class="event-item">
+            <td><%= event.eventName %></td>
+            <td><%= event.price %></td>
+            <td><%= event.eventDate %></td>
+            <td><%= event.eventTime %></td>
+            <td>
+              <form
+                action="/user/reserve/<%= event.eventId %>"
+                class="inline-form"
+              >
+                <button type="submit" class="btn btn-primary">Book Now</button>
+              </form>
+            </td>
+          </tr>
+          <% }}) %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p>No Event Happening In Your City Currently</p>
+      <% } %>
+    </div>
     <div class="event-container">
       <% if(categories != null) { %>
       <h2 class="section-title">Discover Exciting Categories</h2>

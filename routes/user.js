@@ -11,88 +11,100 @@ const { isEmail, isLength } = require("validator");
 const { closeDelimiter } = require("ejs");
 router.get("/", ensureAuthenticated, (req, res) => {
   const getCategorySql =
-    "SELECT categoryID, name, description FROM category ORDER BY categoryID ASC";
+      "SELECT categoryID, name, description FROM category ORDER BY categoryID ASC";
 
   mysql.query(getCategorySql, (categoryErr, categoriesResult) => {
-    if (categoryErr) {
-      console.error(categoryErr);
-      req.flash("error", "Server error (Categories)");
-      return res.redirect("/user");
-    }
-
-    const categories = categoriesResult;
-
-    const updateStatusSql = "CALL UpdateEventStatusClosed()";
-
-    mysql.query(updateStatusSql, (updateStatusErr) => {
-      if (updateStatusErr) {
-        console.error(updateStatusErr);
-      } else {
-        console.log("Status changed to closed for some events");
+      if (categoryErr) {
+          console.error(categoryErr);
+          req.flash("error", "Server error (Categories)");
+          return res.redirect("/user");
       }
 
-      const getRecommendationsSql = `
-      SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId,e.status, ct.cityName
-      FROM event e
-      INNER JOIN city ct ON e.cityCode = ct.cityId
-      INNER JOIN (
-          SELECT c.categoryID
-          FROM category c
-          INNER JOIN event ev ON c.categoryID = ev.categoryId
-          INNER JOIN reservation r ON ev.eventId = r.eventId
-          WHERE r.userId = ?
-          GROUP BY c.categoryID
-          ORDER BY COUNT(*) DESC
-          LIMIT 5
-      ) AS subquery ON e.categoryID = subquery.categoryID;
-      
-      `;
+      const categories = categoriesResult;
 
-      mysql.query(
-        getRecommendationsSql,
-        [req.session.user.id],
-        (recErr, recResult) => {
-          if (recErr) {
-            console.error(recErr);
-            req.flash("error", "Server error (Recommendations)");
-            return res.redirect("/user");
+      const updateStatusSql = "CALL UpdateEventStatusClosed()";
+
+      mysql.query(updateStatusSql, (updateStatusErr) => {
+          if (updateStatusErr) {
+              console.error(updateStatusErr);
+          } else {
+              console.log("Status changed to closed for some events");
           }
 
-          const getNewSql = `
-          SELECT e.eventName, e.price, e.eventDate, e.eventTime,e.eventId,e.status, ct.cityName
-          FROM event e
-          INNER JOIN city ct ON e.cityCode = ct.cityId
-          LEFT JOIN (
-              SELECT c.categoryID
-              FROM category c
-              INNER JOIN event ev ON c.categoryID = ev.categoryId
-              INNER JOIN reservation r ON ev.eventId = r.eventId
-              WHERE r.userId = ?
-              GROUP BY c.categoryID
-              ORDER BY COUNT(*) DESC
-              LIMIT 5
-          ) AS subquery ON e.categoryID = subquery.categoryID
-          WHERE subquery.categoryID IS NULL and e.status in ('active','soldout');
-          
+          const getRecommendationsSql = `
+              SELECT e.eventName, e.price, e.eventDate, e.eventTime, e.eventId, e.status, ct.cityName
+              FROM event e
+              INNER JOIN city ct ON e.cityCode = ct.cityId
+              INNER JOIN (
+                  SELECT c.categoryID
+                  FROM category c
+                  INNER JOIN event ev ON c.categoryID = ev.categoryId
+                  INNER JOIN reservation r ON ev.eventId = r.eventId
+                  WHERE r.userId = ?
+                  GROUP BY c.categoryID
+                  ORDER BY COUNT(*) DESC
+                  LIMIT 5
+              ) AS subquery ON e.categoryID = subquery.categoryID;
           `;
 
-          mysql.query(getNewSql, [req.session.user.id], (NewErr, NewResult) => {
-            if (NewErr) {
-              console.error(NewErr);
-              req.flash("error", "Server error (New Events)");
-              return res.redirect("/user");
-            }
+          mysql.query(getRecommendationsSql, [req.session.user.id], (recErr, recResult) => {
+              if (recErr) {
+                  console.error(recErr);
+                  req.flash("error", "Server error (Recommendations)");
+                  return res.redirect("/user");
+              }
 
-            const recommendation = recResult.length > 0 ? recResult : null;
-            const newToYou = NewResult.length > 0 ? NewResult : null;
+              const getNewSql = `
+                  SELECT e.eventName, e.price, e.eventDate, e.eventTime, e.eventId, e.status, ct.cityName
+                  FROM event e
+                  INNER JOIN city ct ON e.cityCode = ct.cityId
+                  LEFT JOIN (
+                      SELECT c.categoryID
+                      FROM category c
+                      INNER JOIN event ev ON c.categoryID = ev.categoryId
+                      INNER JOIN reservation r ON ev.eventId = r.eventId
+                      WHERE r.userId = ?
+                      GROUP BY c.categoryID
+                      ORDER BY COUNT(*) DESC
+                      LIMIT 5
+                  ) AS subquery ON e.categoryID = subquery.categoryID
+                  WHERE subquery.categoryID IS NULL AND e.status IN ('active', 'soldout');
+              `;
 
-            res.render("user/main", { categories, recommendation, newToYou });
+              mysql.query(getNewSql, [req.session.user.id], (newErr, newResult) => {
+                  if (newErr) {
+                      console.error(newErr);
+                      req.flash("error", "Server error (New Events)");
+                      return res.redirect("/user");
+                  }
+
+                  const getCitySql = `
+                      SELECT e.eventName, e.price, e.eventDate, e.eventTime, e.eventId, e.status,ct.cityName
+                      FROM event e
+                      INNER JOIN users u ON u.cityId = e.cityCode
+                      inner join city ct on ct.cityId=u.cityId
+                      WHERE u.id = ?;
+                  `;
+
+                  mysql.query(getCitySql, [req.session.user.id], (cityErr, cityResult) => {
+                      if (cityErr) {
+                          console.error(cityErr);
+                          req.flash("error", "Server error (Events City Wise)");
+                          return res.redirect("/user");
+                      }
+                      
+                      const recommendation = recResult.length > 0 ? recResult : null;
+                      const newToYou = newResult.length > 0 ? newResult : null;
+                      const cityWise = cityResult.length > 0 ? cityResult : null;
+                      console.log(cityWise);
+                      res.render("user/main", { categories, recommendation, newToYou, cityWise });
+                  });
+              });
           });
-        }
-      );
-    });
+      });
   });
 });
+
 
 router.get("/signup", (req, res) => {
   const sql = "SELECT cityId,cityName FROM city";
