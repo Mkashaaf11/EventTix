@@ -89,7 +89,7 @@
             <li class="llll">
                 <strong>Event Name:</strong> <%= events[i].eventName %><br />
                 <strong>Price:</strong> <%= events[i].price %><br />
-                <strong>Category:</strong> <%= events[i].categoryId %><br/>
+                <strong>Category:</strong> <%= events[i].name %><br/>
                 <strong>Status:</strong> <%= events[i].status %><br/><br/>
                 <% if (events[i].status != "Closed" && events[i].status != "cancel") { %>
                     <a class="update-button" href="/org/events/update/<%= events[i].eventId %>">Update</a>
