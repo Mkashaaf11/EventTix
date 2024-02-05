@@ -8,7 +8,7 @@ This project is the culmination of my database management semester, showcasing a
 
 - **Relational Database concepts:**
   - Implemented transactions, stored procedures, triggers , nested queries and joins.
-  - 
+  
 - **Authentication and Authorization:**
   - Implemented secure authentication and authorization on both client and server sides.
   
